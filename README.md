@@ -18,6 +18,7 @@ Características, Funciones y Detalles de la Aplicación
 
 1.	La aplicación le permitirá al usuario crear un nombre he imagen  que lo identificara  al iniciar la App los cuales pueden ser modificados cuando el lo dese.
 2.	Los  usuarios podrán subir fotos a un servidor previamente escogidos tendrán las siguientes opciones:
+
 •	Tomar la foto 
 •	Subirla de su galería 
 3.	La aplicación le dará la opción  al usuario de ver las tres últimas fotos que se subieron al servidor  o podrá ver  todo el contenido del servidor.
@@ -29,5 +30,7 @@ Características, Funciones y Detalles de la Aplicación
 
      	
 Grupo de trabajo 
+
  Luis miguel Cabarcas 
+ 
 Nicolas Nuñez Avila 
