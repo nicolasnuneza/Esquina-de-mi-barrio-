@@ -20,8 +20,11 @@ Características, Funciones y Detalles de la Aplicación
 2.	Los  usuarios podrán subir fotos a un servidor previamente escogidos tendrán las siguientes opciones:
 
 •	Tomar la foto 
+
 •	Subirla de su galería 
+
 3.	La aplicación le dará la opción  al usuario de ver las tres últimas fotos que se subieron al servidor  o podrá ver  todo el contenido del servidor.
+
 4.	Las fotos que  se mostraran tendrán nombre de usuario y Permite buscar he identificar  fecha  de subida  de la imagen 
 
 
