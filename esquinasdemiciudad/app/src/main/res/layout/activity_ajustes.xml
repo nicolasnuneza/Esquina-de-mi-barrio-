@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_ajustes"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context="com.tec.utb.esquinasdemiciudad.ajustes"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout2">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#FF000000"/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="5dp"
+            android:textSize="20sp"
+            android:id="@+id/edittext_nombre"
+            android:hint="Escribe algun nombre"/>
+    </LinearLayout>
+
+    <Button
+        android:text="Guardar Cambios"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_guardar_"
+        android:theme="@style/MyButton"
+        android:textColor="@android:color/background_light"
+
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_guardar_"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="11dp">
+        <Button
+            android:text="Galeria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_galeria_"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        <Button
+            android:text="Tomar foto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_foto_"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+    </LinearLayout>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        app:civ_border_width="1dp"
+        app:civ_border_color="#FF000000"
+        android:layout_marginTop="23dp"
+        android:id="@+id/circleImageView_cambiarfoto"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cambiar imagen del perfil"
+        android:textSize="20dp"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="6dp" />
+</RelativeLayout>

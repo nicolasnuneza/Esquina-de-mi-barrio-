@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_login"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.tec.utb.esquinasdemiciudad.login">
+   <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       android:id="@+id/textInputLayout">
+
+   </android.support.design.widget.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:id="@+id/linearLayout"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="14dp">
+
+        <Button
+            android:text="Galeria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/boton_galeria"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        <Button
+            android:text="Tomar foto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/boton_foto"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        <Button
+            android:text="Iniciar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/boton_iniciar"
+            android:layout_weight="1"
+            android:theme="@style/MyButton"
+            android:textColor="@android:color/background_light"
+            />
+    </LinearLayout>
+
+    <android.support.design.widget.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ingresa un Nombre"
+        android:id="@+id/edittext_nombre"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Elegir foto del perfil"
+        android:id="@+id/textView"
+        android:layout_below="@+id/edittext_nombre"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="16dp" />
+
+    <com.github.snowdream.android.widget.SmartImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:id="@+id/imagen"
+        android:focusable="false"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="25dp">
+    </com.github.snowdream.android.widget.SmartImageView>
+</RelativeLayout>
