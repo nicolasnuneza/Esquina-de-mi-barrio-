@@ -153,7 +153,7 @@ String res="";
             myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.PNG, 100);
             des=textInputEditText.getText().toString();
             String [] params={"tipo_query","2","id_u",uuid,"descri",des,"imagen",myBase64Image};
-            String res=http.Post("http://comidasutb.gzpot.com/esquina/api/fotos.php",params);
+            String res=http.Post("https://myservidor.000webhostapp.com/api/fotos.php",params);
             if(res.length()>2) {
                 Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
                 finish();

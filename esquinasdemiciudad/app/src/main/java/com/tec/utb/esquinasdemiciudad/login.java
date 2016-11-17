@@ -115,7 +115,7 @@ public class login extends AppCompatActivity {
             final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
             String [] params={"tipo_query","2","id",uuid,"nombre",name,"foto",myBase64Image};
-            String res=http.Post("http://comidasutb.gzpot.com/esquina/api/usuarios.php",params);
+            String res=http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",params);
             if(res.length()>2) {
                 Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
                 finish();

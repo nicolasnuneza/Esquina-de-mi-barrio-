@@ -114,16 +114,78 @@ public class ajustes extends AppCompatActivity {
     }
     //en este metodo cargamos los datos del usuario
     private void cargar_datos() throws ExecutionException, InterruptedException, JSONException, UnsupportedEncodingException {
-        String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        String []parms={"tipo_query","1","id",uuid};
-        String res1= http.Post("http://comidasutb.gzpot.com/esquina/api/usuarios.php",parms);
-        JSONObject jsonObject=new JSONObject(res1);
-        JSONArray jsonArray= jsonObject.getJSONArray("usuario");
+        MySingleton.getInstance(this.getApplicationContext()).
+                getRequestQueue();
+        String url ="https://myservidor.000webhostapp.com/api/usuarios.php";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.i("JSON_login",response);
 
-            Bitmap bitmap=http.Download_Image("http://comidasutb.gzpot.com/esquina/fotos_usuarios/"+jsonArray.getJSONObject(0).getString("foto"));
+                        if(response.length()>2) {
+try {
+    JSONObject jsonObject = new JSONObject(response);
+    JSONArray jsonArray = jsonObject.getJSONArray("usuario");
+
+    Bitmap bitmap = http.Download_Image("https://myservidor.000webhostapp.com/fotos_usuarios/" + jsonArray.getJSONObject(0).getString("foto"));
+    profile.setImageBitmap(bitmap);
+    editText.setText(jsonArray.getJSONObject(0).getString("nombre"));
+} catch (InterruptedException e) {
+    e.printStackTrace();
+} catch (ExecutionException e) {
+    e.printStackTrace();
+} catch (UnsupportedEncodingException e) {
+    e.printStackTrace();
+} catch (JSONException e) {
+    e.printStackTrace();
+}
+                        }
+
+                        else {
+                            Toast.makeText(ajustes.this, "a ocurrido un error al cargar los datos", Toast.LENGTH_SHORT).show();
+
+                        }
+
+
+
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("error","hay un error");
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("tipo_query","1");
+                params.put("id",uuid);
+                return params;
+            }
+        };
+        stringRequest.setShouldCache(false);
+// Add the request to the RequestQueue.
+        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+
+       /* String []parms={"tipo_query","1","id",uuid};
+        String res1= http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",parms);
+        Log.i("string",res1);
+        if(res1.length()>2){
+            JSONObject jsonObject=new JSONObject(res1);
+            JSONArray jsonArray= jsonObject.getJSONArray("usuario");
+
+            Bitmap bitmap=http.Download_Image("https://myservidor.000webhostapp.com/fotos_usuarios/"+jsonArray.getJSONObject(0).getString("foto"));
             profile.setImageBitmap(bitmap);
             editText.setText(jsonArray.getJSONObject(0).getString("nombre"));
+
+        }else {
+            Toast.makeText(this, res1, Toast.LENGTH_SHORT).show();
+        }*/
 
 
 
@@ -149,7 +211,7 @@ public class ajustes extends AppCompatActivity {
         final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         String [] params={"tipo_query","3","id",uuid,"nombre",name,"foto",myBase64Image};
-        String res=http.Post("http://comidasutb.gzpot.com/esquina/api/usuarios.php",params);
+        String res=http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",params);
         if(res.length()>2) {
             Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
             finish();

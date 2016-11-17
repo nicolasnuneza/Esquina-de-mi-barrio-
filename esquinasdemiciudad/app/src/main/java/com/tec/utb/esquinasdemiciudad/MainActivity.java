@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     private void mostrar() {
 
        MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-        String url ="http://comidasutb.gzpot.com/esquina/api/fotos.php";
+        String url ="https://myservidor.000webhostapp.com/api/fotos.php";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONArray jsonArray=jsonObject.getJSONArray("fotos");
                                 for (int i =0;i<jsonArray.length();i++){
                                     //insertamos los datos en el arrego items para luego poder mostrarlos en el recyclerview
-                                    items.add(new foto("http://comidasutb.gzpot.com/esquina/fotos_publicaciones/"+jsonArray.getJSONObject(i).getString("imagen"),jsonArray.getJSONObject(i).getString("fecha"),jsonArray.getJSONObject(i).getString("descripcion"),"http://comidasutb.gzpot.com/esquina/fotos_usuarios/"+jsonArray.getJSONObject(i).getString("foto_perfil"),jsonArray.getJSONObject(i).getString("nombre")));
+                                    items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+jsonArray.getJSONObject(i).getString("imagen"),jsonArray.getJSONObject(i).getString("fecha"),jsonArray.getJSONObject(i).getString("descripcion"),"https://myservidor.000webhostapp.com/fotos_usuarios/"+jsonArray.getJSONObject(i).getString("foto_perfil"),jsonArray.getJSONObject(i).getString("nombre")));
 
                                 }
                                  //actualizamos el adaptador del recyclerview
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     private void mostrar_todo(){
         final RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
                 getRequestQueue();
-        String url ="http://comidasutb.gzpot.com/esquina/api/fotos.php";
+        String url ="https://myservidor.000webhostapp.com/api/fotos.php";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONArray jsonArray=jsonObject.getJSONArray("fotos");
                                 for (int i =0;i<jsonArray.length();i++){
                                     //insertamos los datos en el arrego items para luego poder mostrarlos en el recyclerview
-                                    items.add(new foto("http://comidasutb.gzpot.com/esquina/fotos_publicaciones/"+jsonArray.getJSONObject(i).getString("imagen"),jsonArray.getJSONObject(i).getString("fecha"),jsonArray.getJSONObject(i).getString("descripcion"),"http://comidasutb.gzpot.com/esquina/fotos_usuarios/"+jsonArray.getJSONObject(i).getString("foto_perfil"),jsonArray.getJSONObject(i).getString("nombre")));
+                                    items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+jsonArray.getJSONObject(i).getString("imagen"),jsonArray.getJSONObject(i).getString("fecha"),jsonArray.getJSONObject(i).getString("descripcion"),"https://myservidor.000webhostapp.com/fotos_usuarios/"+jsonArray.getJSONObject(i).getString("foto_perfil"),jsonArray.getJSONObject(i).getString("nombre")));
 
                                 }
                                 Toast.makeText(MainActivity.this, "Se cargaron todas las noticias", Toast.LENGTH_SHORT).show();
@@ -246,11 +246,59 @@ public class MainActivity extends AppCompatActivity {
 
 //metodo para verificar si ya el dispositivo android esta registrado en el servidor
     private void verificar() throws ExecutionException, InterruptedException {
-        String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        String []parms={"tipo_query","1","id",uuid};
 
-        res= http.Post("http://comidasutb.gzpot.com/esquina/api/usuarios.php",parms);
+        MySingleton.getInstance(this.getApplicationContext()).
+                getRequestQueue();
+        String url ="https://myservidor.000webhostapp.com/api/usuarios.php";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.i("JSON_login",response);
+
+                            if(response.length()>2) {
+
+                                Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
+
+
+                            }
+
+                            else {
+                                Intent intent = new Intent(MainActivity.this, login.class);
+                                startActivity(intent);
+                                }
+
+
+
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("error","hay un error");
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("tipo_query","1");
+                params.put("id",uuid);
+                return params;
+            }
+        };
+        stringRequest.setShouldCache(false);
+// Add the request to the RequestQueue.
+        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+
+
+      /*  String []parms={"tipo_query","1","id",uuid};
+
+        res= http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",parms);
+        Log.i("log_login",res);
+        Toast.makeText(this, res, Toast.LENGTH_LONG).show();
         if(res.length()<2){
             Intent intent=new Intent(MainActivity.this,login.class);
             startActivity(intent);
@@ -258,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
 
-        }
+        }*/
 
     }
 
