@@ -260,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
 
                             if(response.length()>2) {
 
-                                Toast.makeText(MainActivity.this, response, Toast.LENGTH_SHORT).show();
 
 
                             }
