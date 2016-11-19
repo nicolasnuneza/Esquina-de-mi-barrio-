@@ -33,6 +33,11 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.github.snowdream.android.widget.SmartImageView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.tec.utb.esquinasdemiciudad.http.http;
 
 import java.io.File;
@@ -96,12 +101,30 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
     }
     @Override
     public void onBindViewHolder(final Adapter_Main.ViewHolder holder, final int i) {
-        Rect rect=new Rect(holder.imagen.getLeft(),holder.imagen.getTop(),holder.imagen.getRight(),holder.imagen.getBottom());
-        Rect rect1=new Rect(holder.imagen_avatar.getLeft(),holder.imagen_avatar.getTop(),holder.imagen_avatar.getRight(),holder.imagen_avatar.getBottom());
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
+        root.child(items.get(i).getAvatar_nombre()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+
+                holder.nombre.setText(dataSnapshot.child("nombre").getValue().toString());
+                holder.imagen_avatar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showImage(v.getContext(),items.get(i).getAvatar_imagen(),dataSnapshot.child("nombre").getValue().toString());
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         ImageLoader mImageLoader;
         mImageLoader = MySingleton.getInstance(context).getImageLoader();
         holder.imagen.setImageUrl(items.get(i).getImageUrl(),mImageLoader);
-        holder.nombre.setText(items.get(i).getAvatar_nombre());
         holder.descripcion.setText(String.valueOf(items.get(i).getDescripcion()));
         ImageRequest request = new ImageRequest(items.get(i).getAvatar_imagen(),
                 new Response.Listener<Bitmap>() {
@@ -130,16 +153,7 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
 
             }
         });
-        holder.imagen_avatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-
-
-                    showImage(v.getContext(),items.get(i).getAvatar_imagen(),items.get(i).getAvatar_nombre());
-
-            }
-        });
 
 
 

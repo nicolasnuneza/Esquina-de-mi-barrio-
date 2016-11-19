@@ -36,6 +36,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.snowdream.android.widget.SmartImageView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.http.http;
 
 import org.json.JSONArray;
@@ -45,6 +52,10 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -146,8 +157,33 @@ String res="";
             return bitmap.getRowBytes() * bitmap.getHeight();
         }
     }
+    private String getDateTime() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(); return dateFormat.format(date); }
     private void publicar_foto() throws ExecutionException, InterruptedException {
         if(myBitmap_img!=null){
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Publicando...");
+        progressDialog.show();
+        uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("fotos");
+        des = textInputEditText.getText().toString();
+        String fecha = getDateTime();
+            final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+
+            String [] params={"tipo","1","nombre_imagen",fecha,"imagen",myBase64Image};
+            String res=http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);
+
+            subirfoto foto = new subirfoto(root.push().getKey(), "" + fecha, des, uuid, fecha + ".jpg");
+
+        root.child(foto.getFecha()).setValue(foto);
+
+            progressDialog.dismiss();
+            Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
+            finish();
+    }
+        /*if(myBitmap_img!=null){
             uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
             myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.PNG, 100);
@@ -164,7 +200,7 @@ String res="";
         }else {
             Toast.makeText(subir_foto.this, "Debes cargar alguna imagen para publicarla", Toast.LENGTH_SHORT).show();
 
-        }
+        }*/
 
         /*MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
         String url ="http://comidasutb.gzpot.com/esquina/api/fotos.php";
@@ -278,6 +314,7 @@ String res="";
         }
     }
     //resultado de la imagen seleccionada o tomada por el usuario
+    Uri fotoasubir;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -299,6 +336,7 @@ String res="";
                     break;
                 case 300:
                     Uri uri=data.getData();
+                    fotoasubir=uri;
                     try {
 
                         myBitmap_img= MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);

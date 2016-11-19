@@ -31,6 +31,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.snowdream.android.widget.SmartImageView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.http.http;
 
 import java.io.ByteArrayOutputStream;
@@ -109,10 +116,31 @@ public class login extends AppCompatActivity {
     }
 
         private void registrar() throws ExecutionException, InterruptedException {
+            if(myBitmap_img!=null){
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Creando usuario...");
+            progressDialog.show();
+            String name = nombre.getText().toString();
+            String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
+            Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
+            root.child(usuarios.getId()).setValue(usuarios);
+                final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+
+                String [] params={"tipo","2","nombre_imagen",uuid,"imagen",myBase64Image};
+                String res=http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);
+
+                progressDialog.dismiss();
+                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                finish();
+                    // Handle unsuccessful uploads
+
+        }
+
+
+            /*
 
             final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
-            String name=nombre.getText().toString();
-            final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
             String [] params={"tipo_query","2","id",uuid,"nombre",name,"foto",myBase64Image};
             String res=http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",params);
@@ -122,7 +150,7 @@ public class login extends AppCompatActivity {
             }
             else {
                 Toast.makeText(login.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-            }
+            }*/
 
           /*  RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
                     getRequestQueue();

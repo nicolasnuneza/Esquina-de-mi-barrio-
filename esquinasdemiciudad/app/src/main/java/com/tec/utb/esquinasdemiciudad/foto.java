@@ -1,10 +1,12 @@
 package com.tec.utb.esquinasdemiciudad;
 
+import java.util.Comparator;
+
 /**
  * Created by luis mi on 24/10/2016.
  */
 //clase para manejar las fotos del servidor
-public class foto {
+public class foto implements Comparable<foto>{
     public String getAvatar_nombre() {
         return avatar_nombre;
     }
@@ -23,17 +25,21 @@ public class foto {
 
     String imageUrl;
 
-    public foto(String imageUrl, String fecha, String descripcion, String avatar_imagen, String avatar_nombre) {
+    public foto(String imageUrl, String fecha, String descripcion, String avatar_imagen, String avatar_nombre,String fechacompare) {
         this.imageUrl = imageUrl;
         this.fecha = fecha;
         this.descripcion = descripcion;
         this.avatar_imagen = avatar_imagen;
         this.avatar_nombre = avatar_nombre;
+        this.fechacompare=fechacompare;
     }
 
     String avatar_nombre;
 
-
+    @Override
+    public int compareTo(foto o) {
+        return getFechacompare().compareTo(o.getFechacompare());
+    }
 
     String avatar_imagen;
 
@@ -63,6 +69,17 @@ public class foto {
 
     String descripcion;
     String fecha;
+
+    public String getFechacompare() {
+        return fechacompare;
+    }
+
+    public void setFechacompare(String fechacompare) {
+        this.fechacompare = fechacompare;
+    }
+
+    String fechacompare;
+
 
 
 }

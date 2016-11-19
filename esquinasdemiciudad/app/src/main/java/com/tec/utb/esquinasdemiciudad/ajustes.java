@@ -1,6 +1,7 @@
 package com.tec.utb.esquinasdemiciudad;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,7 +29,18 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.http.http;
 
 import org.json.JSONArray;
@@ -114,9 +126,48 @@ public class ajustes extends AppCompatActivity {
     }
     //en este metodo cargamos los datos del usuario
     private void cargar_datos() throws ExecutionException, InterruptedException, JSONException, UnsupportedEncodingException {
-        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        MySingleton.getInstance(this.getApplicationContext()).
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
+        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        root.child(uuid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                editText.setText(dataSnapshot.child("nombre").getValue(String.class).toString());
+
+                Bitmap bitmap = null;
+                try {
+                    bitmap = http.Download_Image("https://myservidor.000webhostapp.com/fotos_usuarios/" + dataSnapshot.child("foto").getValue(String.class).toString());
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                profile.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*MySingleton.getInstance(this.getApplicationContext()).
                 getRequestQueue();
         String url ="https://myservidor.000webhostapp.com/api/usuarios.php";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -169,7 +220,7 @@ try {
         };
         stringRequest.setShouldCache(false);
 // Add the request to the RequestQueue.
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
 
 
        /* String []parms={"tipo_query","1","id",uuid};
@@ -190,7 +241,10 @@ try {
 
 
     }
-        //metodo para convertir un bitmap a base64 ya que el servidor interpreta las imagenes en este formato
+
+
+
+            //metodo para convertir un bitmap a base64 ya que el servidor interpreta las imagenes en este formato
     public static String encodeToBase64(Bitmap image, Bitmap.CompressFormat compressFormat, int quality)
     {
         if (image==null){
@@ -206,6 +260,41 @@ try {
     String res="";
     //metodo para hacer post al servidor y actualizar los datos
     private void guardar() throws ExecutionException, InterruptedException {
+
+        if(myBitmap_img!=null){
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Creando usuario...");
+            progressDialog.show();
+            String name = editText.getText().toString();
+            String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            myBitmap_img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
+
+            root.child(usuarios.getId()).setValue(usuarios);
+
+            final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+
+            String [] params={"tipo","2","nombre_imagen",uuid,"imagen",myBase64Image};
+            String res=http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);
+progressDialog.dismiss();
+            Toast.makeText(this, "Foto perfil cambiada", Toast.LENGTH_SHORT).show();
+            finish();
+
+        }
+        else {
+            DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
+            String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            String name = editText.getText().toString();
+
+            root.child(uuid).child("nombre").setValue(name);
+        }
+
+
+/*
         final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
         String name=editText.getText().toString();
         final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -218,7 +307,7 @@ try {
         }
         else {
             Toast.makeText(ajustes.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-        }
+        }*/
 
       /*  RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
                 getRequestQueue();
