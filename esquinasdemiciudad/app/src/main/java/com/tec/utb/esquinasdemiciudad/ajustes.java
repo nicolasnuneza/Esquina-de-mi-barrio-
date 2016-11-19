@@ -296,16 +296,31 @@ try {
             int finalWidth = maxWidth;
             int finalHeight = maxHeight;
 
-
-            if(width>maxWidth){
-                finalWidth = maxWidth;
+            if(width>3500&&width<4500){
+                finalWidth = width-((width/2)+(width/3));
+                finalHeight=height-((height/2)+(height/3));
             }
-            else {
+            else if(width>2500&&width<=3499){
+                finalWidth = width-((width/2)+(width/4));
+                finalHeight=height-((height/2)+(height/4));
+            }
+            else if(width>1700&&width<=2499){
+                finalWidth = width-((width/2)+(width/5));
+                finalHeight=height-((height/2)+(height/5));
+            }
+            else if(width>1001&&width<1699){
+                finalWidth = width-((width/2)+(width/6));
+                finalHeight=height-((height/2)+(height/6));
+            }
+            else if(width>800 && width<1000){
+                finalWidth = width-(width/3);
+                finalHeight=height-(height/3);
+            }
+            else if(width<799){
                 finalWidth = width;
+                finalHeight=height;
             }
-            if(height>maxHeight){
-                finalHeight=maxHeight;
-            }else {finalHeight=height;}
+
             Log.i("imagen final",finalWidth+" - "+finalHeight);
             image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
             return image;
@@ -329,7 +344,7 @@ try {
                         }
                     });
                     myBitmap_img= BitmapFactory.decodeFile(mpath);
-                    myBitmap_img=resize(myBitmap_img,640,400);
+                    myBitmap_img=resize(myBitmap_img,800,800);
                     imagen.setImageBitmap(myBitmap_img);
 
                     break;
@@ -337,7 +352,7 @@ try {
                     Uri uri=data.getData();
                     try {
                         myBitmap_img= MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-                        myBitmap_img=resize(myBitmap_img,640,400);
+                        myBitmap_img=resize(myBitmap_img,800,800);
                         imagen.setImageBitmap(myBitmap_img);
 
                     } catch (IOException e) {

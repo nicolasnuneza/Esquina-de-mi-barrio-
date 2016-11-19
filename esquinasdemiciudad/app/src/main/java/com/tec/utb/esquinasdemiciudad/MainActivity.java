@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.i("error","hay un error");
+                Log.i("error","hay un error"+error.getMessage());
             }
         }){
             @Override
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-               Log.i("error","hay un error");
+               Log.i("error","hay un error"+error.getMessage());
             }
         }){
             @Override
