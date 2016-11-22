@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#fff"
+        android:layout_marginStart="3dp"
+        android:layout_marginBottom="3dp"
+        >
+
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/imagen_avatar"
+            android:layout_marginEnd="10sp"
+
+        />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000"
+                android:textSize="20dp"
+                android:id="@+id/nombre_avatar"
+                android:text="Luis cabarcas"
+                />
+            <TextView
+                android:id="@+id/comentario_mensaje"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hola a todos"/>
+        </LinearLayout>
+       <TextView
+           android:id="@+id/comentario_tiempo"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="1h"
+           android:textSize="15sp"
+           />
+
+    </LinearLayout>
+
+
+</LinearLayout>

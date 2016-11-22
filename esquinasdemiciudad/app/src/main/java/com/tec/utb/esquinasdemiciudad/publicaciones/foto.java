@@ -1,6 +1,4 @@
-package com.tec.utb.esquinasdemiciudad;
-
-import java.util.Comparator;
+package com.tec.utb.esquinasdemiciudad.publicaciones;
 
 /**
  * Created by luis mi on 24/10/2016.
@@ -25,13 +23,14 @@ public class foto implements Comparable<foto>{
 
     String imageUrl;
 
-    public foto(String imageUrl, String fecha, String descripcion, String avatar_imagen, String avatar_nombre,String fechacompare) {
+    public foto(String imageUrl, String fecha, String descripcion, String avatar_imagen, String avatar_nombre,String fechacompare,String id) {
         this.imageUrl = imageUrl;
         this.fecha = fecha;
         this.descripcion = descripcion;
         this.avatar_imagen = avatar_imagen;
         this.avatar_nombre = avatar_nombre;
         this.fechacompare=fechacompare;
+        this.id=id;
     }
 
     String avatar_nombre;
@@ -69,6 +68,16 @@ public class foto implements Comparable<foto>{
 
     String descripcion;
     String fecha;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    String id;
 
     public String getFechacompare() {
         return fechacompare;

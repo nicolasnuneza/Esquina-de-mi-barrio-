@@ -1,7 +1,6 @@
 package com.tec.utb.esquinasdemiciudad;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,26 +25,19 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.http.http;
+import com.tec.utb.esquinasdemiciudad.login.Usuarios;
+import com.tec.utb.esquinasdemiciudad.login.login;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -265,24 +257,46 @@ try {
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setMessage("Creando usuario...");
             progressDialog.show();
-            String name = editText.getText().toString();
-            String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            myBitmap_img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-
-            Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
-
-            root.child(usuarios.getId()).setValue(usuarios);
-
+            final String name = editText.getText().toString();
+            final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            final DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
             final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
-            String [] params={"tipo","2","nombre_imagen",uuid,"imagen",myBase64Image};
-            String res=http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);
-progressDialog.dismiss();
-            Toast.makeText(this, "Foto perfil cambiada", Toast.LENGTH_SHORT).show();
-            finish();
+            MySingleton.getInstance(this.getApplicationContext()).
+                    getRequestQueue();
+            String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // Display the first 500 characters of the response string.
+                            Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
+
+                            root.child(usuarios.getId()).setValue(usuarios); progressDialog.dismiss();
+                            progressDialog.dismiss();
+                            Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
+                            finish();
+
+
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i("error","hay un error");
+                }
+            }){
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String,String> params = new HashMap<String, String>();
+                    params.put("tipo","2");
+                    params.put("nombre_imagen",uuid);
+                    params.put("imagen",myBase64Image);
+                    return params;
+                }
+            };
+// Add the request to the RequestQueue.
+            MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
 
         }
         else {
@@ -291,6 +305,7 @@ progressDialog.dismiss();
             String name = editText.getText().toString();
 
             root.child(uuid).child("nombre").setValue(name);
+            Toast.makeText(this, "Nombre actualizado", Toast.LENGTH_SHORT).show();
         }
 
 

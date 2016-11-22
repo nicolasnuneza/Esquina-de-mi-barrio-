@@ -1,4 +1,4 @@
-package com.tec.utb.esquinasdemiciudad;
+package com.tec.utb.esquinasdemiciudad.publicar;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -6,17 +6,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,32 +23,26 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.provider.Settings.Secure;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.snowdream.android.widget.SmartImageView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-import com.tec.utb.esquinasdemiciudad.http.http;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.firebase.database.ValueEventListener;
+import com.tec.utb.esquinasdemiciudad.MySingleton;
+import com.tec.utb.esquinasdemiciudad.R;
+import com.tec.utb.esquinasdemiciudad.login.login;
+import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,8 +52,6 @@ import java.util.concurrent.ExecutionException;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static com.tec.utb.esquinasdemiciudad.R.id.descripcion;
-import static java.security.AccessController.getContext;
 
 public class subir_foto extends AppCompatActivity {
     //declaramos variables a utilizar
@@ -143,7 +131,6 @@ public class subir_foto extends AppCompatActivity {
 
 String res="";
     //metodo para hacer post al servidor y subir una foto
-    String uuid;
 
     String myBase64Image ;
     String des;
@@ -160,83 +147,90 @@ String res="";
     private String getDateTime() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date(); return dateFormat.format(date); }
-    private void publicar_foto() throws ExecutionException, InterruptedException {
-        if(myBitmap_img!=null){
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Publicando...");
-        progressDialog.show();
-        uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+    DatabaseReference root = FirebaseDatabase.getInstance().getReference();
 
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("fotos");
-        des = textInputEditText.getText().toString();
-        String fecha = getDateTime();
-            final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+    private DatabaseReference root1 = FirebaseDatabase.getInstance().getReference().child("usuarios");
 
-            String [] params={"tipo","1","nombre_imagen",fecha,"imagen",myBase64Image};
-            String res=http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);
+    //metodo para verificar si ya el dispositivo android esta registrado en el servidor
+    private void verificar() {
+        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-            subirfoto foto = new subirfoto(root.push().getKey(), "" + fecha, des, uuid, fecha + ".jpg");
+        root1.child(uuid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
 
-        root.child(foto.getFecha()).setValue(foto);
+                } else {
+                    Intent intent = new Intent(subir_foto.this, login.class);
+                    startActivity(intent);
+                }
+            }
 
-            progressDialog.dismiss();
-            Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
-            finish();
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
     }
-        /*if(myBitmap_img!=null){
-            uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-            myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.PNG, 100);
-            des=textInputEditText.getText().toString();
-            String [] params={"tipo_query","2","id_u",uuid,"descri",des,"imagen",myBase64Image};
-            String res=http.Post("https://myservidor.000webhostapp.com/api/fotos.php",params);
-            if(res.length()>2) {
-                Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-            else {
-                Toast.makeText(subir_foto.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-            }
-        }else {
-            Toast.makeText(subir_foto.this, "Debes cargar alguna imagen para publicarla", Toast.LENGTH_SHORT).show();
+    private void publicar_foto() throws ExecutionException, InterruptedException {
 
-        }*/
 
-        /*MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-        String url ="http://comidasutb.gzpot.com/esquina/api/fotos.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        Log.i("JSON",response);
-                            if(response.length()>2) {
+            if(myBitmap_img!=null){
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage("Publicando...");
+                progressDialog.show();
+
+                des = textInputEditText.getText().toString();
+
+                //
+                final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+
+                final String fecha = getDateTime();
+                MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
+                                subirfoto foto = new subirfoto(root.push().getKey(), "" + fecha, des, uuid, fecha + ".jpg");
+
+                                root.child("fotos").child(foto.getFecha()+"-"+foto.getId()).setValue(foto);
+
                                 progressDialog.dismiss();
                                 Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
                                 finish();
+
                             }
-                            else {
-                                Toast.makeText(subir_foto.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("error","hay un error");
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("error","hay un error");
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("tipo_query","2");
-                params.put("id_u",uuid);
-                params.put("descri",des);
-                params.put("imagen",myBase64Image);
-                return params;
-            }
-        };
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("tipo","1");
+                        params.put("nombre_imagen",fecha);
+                        params.put("imagen",myBase64Image);
+                        return params;
+                    }
+                };
 // Add the request to the RequestQueue.
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
+                MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+                //
+                //
+                //
+
+            }
+            else {Toast.makeText(subir_foto.this, "Debes cargar alguna imagen para publicarla", Toast.LENGTH_SHORT).show();}
+
+
 
 
     }

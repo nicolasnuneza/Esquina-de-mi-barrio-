@@ -1,4 +1,4 @@
-package com.tec.utb.esquinasdemiciudad;
+package com.tec.utb.esquinasdemiciudad.login;
 
 /**
  * Created by luis mi on 19/11/2016.
@@ -33,6 +33,7 @@ public class Usuarios {
     private String foto;
     private String nombre;
 
+    public Usuarios(){}
     public Usuarios(String nombre, String foto, String id) {
         this.nombre = nombre;
         this.foto = foto;

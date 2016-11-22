@@ -1,4 +1,4 @@
-package com.tec.utb.esquinasdemiciudad;
+package com.tec.utb.esquinasdemiciudad.publicar;
 
 /**
  * Created by luis mi on 18/11/2016.

@@ -4,7 +4,7 @@
     android:id="@+id/activity_login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tec.utb.esquinasdemiciudad.login">
+    tools:context="com.tec.utb.esquinasdemiciudad.login.login">
    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

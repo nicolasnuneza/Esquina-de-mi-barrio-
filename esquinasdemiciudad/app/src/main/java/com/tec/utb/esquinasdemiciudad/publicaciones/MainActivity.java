@@ -1,56 +1,33 @@
-package com.tec.utb.esquinasdemiciudad;
+package com.tec.utb.esquinasdemiciudad.publicaciones;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.tec.utb.esquinasdemiciudad.http.http;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.tec.utb.esquinasdemiciudad.R;
+import com.tec.utb.esquinasdemiciudad.ajustes;
+import com.tec.utb.esquinasdemiciudad.login.login;
+import com.tec.utb.esquinasdemiciudad.publicar.subir_foto;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -58,8 +35,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
@@ -68,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private static int firstVisibleInListview;
-    boolean todo = false;//sirve para determinar que actualizacion hacer
-    String res = "";
     final ArrayList<foto> items = new ArrayList();//array que contendra las publicaciones para despues mostrarlas en el recyclerveiw
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -85,19 +57,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        //optenemos el id unico del telefono
-        String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        try {
             //metodo para verivicar si ya estamos registrado en la app
             verificar();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -152,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     //metodo para obtener y cargar las publicaciones desde el servidor
     public String fecha(String d) throws ParseException {
+        String[] mese={"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date1 = formatter.parse(d);
@@ -165,18 +129,20 @@ public class MainActivity extends AppCompatActivity {
         Log.i("minutos",""+(dias / (1000 * 60)));
         Log.i("horas",""+(dias / (1000 * 60*60)));
 
-        if (dias_ < 1) {
-            if ((dias /(1000* 60)) < 3) {
-                return "hace un momento";
-            } else if ((dias / (1000*60)) < 60 && (dias / (1000*60)) >= 3) {
-                return "hace " + (dias / (1000*60)) + " min";
-            } else if ((dias / (1000*60*60) ) >= 1) {
-                return "hace " + (dias /(1000* 60 * 60)) + " h";
-            }
-            else {return d;}
-        } else {
-            return date1.getDay() + " del " + date1.getMonth() + "a las: " + date1.getHours() + ":" + date1.getMinutes();
+        if ((dias /(1000* 60)) < 1) {
+            return "hace unos segundos";
+        } else if ((dias / (1000*60)) < 60 && (dias / (1000*60)) >=1) {
+            return  (dias / (1000*60)) + "min";
+        } else if ((dias / (1000*60*60) ) >= 1 &&(dias / (1000*60*60) ) < 24 ) {
+            return (dias /(1000* 60 * 60)) + "h";
         }
+        else if((dias / (1000*60*60*24)) >= 1&&(dias / (1000*60*60*24)) < 7){
+            return (dias /(1000* 60 * 60*24)) + "d";
+        }
+        else if((dias / (1000*60*60*24*7)) >= 1){
+            return (dias / (1000*60*60*24*7))+"sem";
+        }
+        else {return d;}
 
 
     }
@@ -196,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("informacion", " " + imagen + urlimagen + id + nombre + avatar);
 
                     try {
-                        items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+imagen, fecha(fecha), descripcion, "https://myservidor.000webhostapp.com/fotos_usuarios/"+id+".jpg",id,fecha));
+                        items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+imagen, fecha(fecha), descripcion, "https://myservidor.000webhostapp.com/fotos_usuarios/"+id+".jpg",id,fecha, postSnapshot.child("id").getValue().toString()));
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -214,63 +180,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-     /*  MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-        String url ="https://myservidor.000webhostapp.com/api/fotos.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.i("JSON",response);
-                        try{
-                            if(response.length()>2){
-                                items.clear();
-                                JSONObject jsonObject=new JSONObject(response);
-                                JSONArray jsonArray=jsonObject.getJSONArray("fotos");
-                                for (int i =0;i<jsonArray.length();i++){
-                                    //insertamos los datos en el arrego items para luego poder mostrarlos en el recyclerview
-                                    items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+jsonArray.getJSONObject(i).getString("imagen"),jsonArray.getJSONObject(i).getString("fecha"),jsonArray.getJSONObject(i).getString("descripcion"),"https://myservidor.000webhostapp.com/fotos_usuarios/"+jsonArray.getJSONObject(i).getString("foto_perfil"),jsonArray.getJSONObject(i).getString("nombre")));
-
-                                }
-                                 //actualizamos el adaptador del recyclerview
-                                new Adapter_Main().wap(items);
-                                mAdapter.notifyDataSetChanged();
-                                Toast.makeText(MainActivity.this, "Se cargaron las tres ultimas noticias", Toast.LENGTH_SHORT).show();
-
-                            }
-                            else {
-                                Toast.makeText(MainActivity.this, "No hay publicaciones", Toast.LENGTH_SHORT).show();
-                            }
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("error","hay un error"+error.getMessage());
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("tipo_query","1");
-                return params;
-            }
-        };
-        stringRequest.setShouldCache(false);
-// Add the request to the RequestQueue.
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
-
     }
     //hace la mima funcion del metodo de arriba
 
     private DatabaseReference root1 = FirebaseDatabase.getInstance().getReference().child("usuarios");
 
     //metodo para verificar si ya el dispositivo android esta registrado en el servidor
-    private void verificar() throws ExecutionException, InterruptedException {
+    private void verificar() {
         final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         root1.child(uuid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -289,63 +205,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-       /* MySingleton.getInstance(this.getApplicationContext()).
-                getRequestQueue();
-        String url ="https://myservidor.000webhostapp.com/api/usuarios.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.i("JSON_login",response);
-
-                            if(response.length()>2) {
-
-
-
-                            }
-
-                            else {
-                                Intent intent = new Intent(MainActivity.this, login.class);
-                                startActivity(intent);
-                                }
-
-
-
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("error","hay un error");
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("tipo_query","1");
-                params.put("id",uuid);
-                return params;
-            }
-        };
-        stringRequest.setShouldCache(false);
-// Add the request to the RequestQueue.
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
-
-
-
-      /*  String []parms={"tipo_query","1","id",uuid};
-
-        res= http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",parms);
-        Log.i("log_login",res);
-        Toast.makeText(this, res, Toast.LENGTH_LONG).show();
-        if(res.length()<2){
-            Intent intent=new Intent(MainActivity.this,login.class);
-            startActivity(intent);
-
-        }
-        else {
-
-        }*/
 
     }
 

@@ -1,4 +1,4 @@
-package com.tec.utb.esquinasdemiciudad;
+package com.tec.utb.esquinasdemiciudad.login;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -10,7 +10,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -26,18 +25,14 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.snowdream.android.widget.SmartImageView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.tec.utb.esquinasdemiciudad.MySingleton;
+import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.http.http;
 
 import java.io.ByteArrayOutputStream;
@@ -116,77 +111,56 @@ public class login extends AppCompatActivity {
     }
 
         private void registrar() throws ExecutionException, InterruptedException {
-            if(myBitmap_img!=null){
+            if(myBitmap_img!=null&&!nombre.getText().toString().trim().equals("")){
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setMessage("Creando usuario...");
             progressDialog.show();
-            String name = nombre.getText().toString();
-            String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
-            Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
-            root.child(usuarios.getId()).setValue(usuarios);
+            final String name = nombre.getText().toString();
+            final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            final DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
                 final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
-                String [] params={"tipo","2","nombre_imagen",uuid,"imagen",myBase64Image};
-                String res=http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);
 
-                progressDialog.dismiss();
-                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                finish();
-                    // Handle unsuccessful uploads
+                MySingleton.getInstance(this.getApplicationContext()).
+                        getRequestQueue();
+                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // Display the first 500 characters of the response string.
+                                    Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
+                                    root.child(usuarios.getId()).setValue(usuarios);
+                                    progressDialog.dismiss();
+                                    Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                                    finish();
 
-        }
 
-
-            /*
-
-            final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
-
-            String [] params={"tipo_query","2","id",uuid,"nombre",name,"foto",myBase64Image};
-            String res=http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",params);
-            if(res.length()>2) {
-                Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-            else {
-                Toast.makeText(login.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-            }*/
-
-          /*  RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
-                    getRequestQueue();
-            String url ="http://comidasutb.gzpot.com/esquina/api/fotos.php";
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // Display the first 500 characters of the response string.
-                            Log.i("JSON",response);
-                            if(response.length()>2) {
-                                Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                                finish();
                             }
-                            else {
-                                Toast.makeText(login.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.i("error","hay un error");
-                }
-            }){
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String,String> params = new HashMap<String, String>();
-                    params.put("tipo_query","2");
-                    params.put("id",uuid);
-                    params.put("nombre",nombre.getText().toString());
-                    params.put("imagen",myBase64Image);
-                    return params;
-                }
-            };
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("error","hay un error");
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("tipo","2");
+                        params.put("nombre_imagen",uuid);
+                        params.put("imagen",myBase64Image);
+                        return params;
+                    }
+                };
 // Add the request to the RequestQueue.
-            MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
+                MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+
+        }else {
+                Toast.makeText(this, "Carga alguna imagen y coloca un nombre", Toast.LENGTH_SHORT).show();
+            }
+
+
 
         }
     public Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
