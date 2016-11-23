@@ -150,6 +150,8 @@ verificar();
                                     root.child(usuarios.getId()).setValue(usuarios);
                                     progressDialog.dismiss();
                                     Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                                Intent intent=new Intent(login.this,MainActivity.class);
+                                startActivity(intent);
                                     finish();
 
 
