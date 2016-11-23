@@ -16,9 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".publicaciones.MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".login.login"
+            android:label="Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +25,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".publicar.subir_foto" />
-        <activity android:name=".login.login" />
+        <activity android:name=".publicaciones.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ajustes" />
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for

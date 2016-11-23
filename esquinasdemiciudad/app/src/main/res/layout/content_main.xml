@@ -16,7 +16,7 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:id="@+id/recyclerview_main"
-       android:background="#4d4e58">
+       android:background="#000">
 
    </android.support.v7.widget.RecyclerView>
    </android.support.v4.widget.SwipeRefreshLayout>

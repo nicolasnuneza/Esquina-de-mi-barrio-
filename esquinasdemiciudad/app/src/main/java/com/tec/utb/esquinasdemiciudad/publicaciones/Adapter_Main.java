@@ -2,14 +2,21 @@ package com.tec.utb.esquinasdemiciudad.publicaciones;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
@@ -19,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -36,6 +44,15 @@ import com.tec.utb.esquinasdemiciudad.comentarios.comentario;
 import com.tec.utb.esquinasdemiciudad.comentarios.comentarios;
 import com.tec.utb.esquinasdemiciudad.likes.like;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -60,7 +77,6 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         public CircleImageView imagen_avatar;
         public TextView fecha;
         public Button comentar;
-        public Button opciones;
         public TextView num_comentarios;
         public Button like_boton;
 
@@ -73,7 +89,6 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
             imagen_avatar= (CircleImageView) v.findViewById(R.id.imagen_avatar);
             fecha= (TextView) v.findViewById(R.id.fecha_publicacion);
             comentar= (Button) v.findViewById(R.id.boton_comentar);
-            opciones= (Button) v.findViewById(R.id.boton_opciones);
             like_boton= (Button) v.findViewById(R.id.boton_like);
         }
 
@@ -109,11 +124,11 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
                 }
                 if(estado==true){
                     Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_black_24dp );
-                    img.setBounds( 0, 0, 60, 60 );
+                    img.setBounds( 0, 0, 50, 50 );
                     button.setCompoundDrawables( img, null, null, null );
                 }else {
                     Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_black_24dp );
-                    img.setBounds( 0, 0, 60, 60 );
+                    img.setBounds( 0, 0, 50, 50 );
                     button.setCompoundDrawables( img, null, null, null );
                 }
             }
@@ -126,16 +141,43 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
 
 
     }
-    public void verificar_like(final String id_publicacion, final String id_usuario){
+
+    public String fecha(String d) throws ParseException {
+        String[] mese={"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date1 = formatter.parse(d);
+        Date date = new Date();
+        dateFormat.format(date);
+        long dias = date.getTime() - date1.getTime();
+
+        long dias_ = dias / (1000 * 60 * 60 * 24);
+        Log.i("dias",""+dias_);
+        Log.i("segundos",""+dias/1000);
+        Log.i("minutos",""+(dias / (1000 * 60)));
+        Log.i("horas",""+(dias / (1000 * 60*60)));
+
+        if ((dias /(1000* 60)) < 1) {
+            return "hace unos segundos";
+        } else if ((dias / (1000*60)) < 60 && (dias / (1000*60)) >=1) {
+            return  (dias / (1000*60)) + "min";
+        } else if ((dias / (1000*60*60) ) >= 1 &&(dias / (1000*60*60) ) < 24 ) {
+            return (dias /(1000* 60 * 60)) + "h";
+        }
+        else if((dias / (1000*60*60*24)) >= 1&&(dias / (1000*60*60*24)) < 7){
+            return (dias /(1000* 60 * 60*24)) + "d";
+        }
+        else if((dias / (1000*60*60*24*7)) >= 1){
+            return (dias / (1000*60*60*24*7))+"sem";
+        }
+        else {return d;}
 
 
     }
     @Override
     public void onBindViewHolder(final Adapter_Main.ViewHolder holder, final int i) {
         final String uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        if(uuid.equals(items.get(i).avatar_nombre)){
-            holder.opciones.setVisibility(View.VISIBLE);
-        }else {holder.opciones.setVisibility(View.INVISIBLE);}
+
         holder.nombre.setText("");
         holder.imagen.setImageBitmap(null);
         holder.imagen_avatar.setImageBitmap(null);
@@ -249,6 +291,8 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         });
         ImageLoader mImageLoader;
         mImageLoader = MySingleton.getInstance(context).getImageLoader();
+        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+holder.imagen.setMinimumWidth(screenWidth);
         holder.imagen.setImageUrl(items.get(i).getImageUrl(),mImageLoader);
         holder.descripcion.setText(String.valueOf(items.get(i).getDescripcion()));
         ImageRequest request = new ImageRequest(items.get(i).getAvatar_imagen(),
@@ -268,8 +312,11 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         MySingleton.getInstance(context).addToRequestQueue(request);
 
 
-
-        holder.fecha.setText(items.get(i).getFecha());
+        try {
+            holder.fecha.setText(fecha( items.get(i).getFecha()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         holder.imagen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -283,13 +330,23 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
 
 
     }
-    public void showImage(Context context,String bitmap,String des) {
+    private final String APP_DIRECTORIO ="fotos/";
+    private final String MEDIA_DIRECTORIO =APP_DIRECTORIO+"misfotos/";
+
+    private String getDateTime() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");
+        Date date = new Date(); return dateFormat.format(date); }
+    public void showImage(final Context context, String bitmap, String des) {
         LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(LAYOUT_INFLATER_SERVICE);
-        View layout = layoutInflater.inflate(R.layout.info_foto, null);
+        final View layout = layoutInflater.inflate(R.layout.info_foto, null);
         ImageLoader mImageLoader;
         mImageLoader = MySingleton.getInstance(context).getImageLoader();
 
-        NetworkImageView smartImageView= (NetworkImageView) layout.findViewById(R.id.imagen_info);
+        final NetworkImageView smartImageView= (NetworkImageView) layout.findViewById(R.id.imagen_info);
+        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+        smartImageView.setMinimumWidth(screenWidth);
+        smartImageView.setMinimumHeight(screenHeight-105);
         smartImageView.setImageUrl(bitmap,mImageLoader);
         TextView textView = (TextView) layout.findViewById(R.id.descripcion_info);
         textView.setText(des);
@@ -307,6 +364,78 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
 
         dialog.show();
 
+    }    String mpath="";
+
+    private String guardarImagen (String nombre, Bitmap imagen) throws IOException {
+        File file=new File(Environment.getExternalStorageDirectory(),MEDIA_DIRECTORIO);
+        boolean directorio_exist=file.exists();
+        if(!directorio_exist){
+            directorio_exist=  file.mkdirs();
+        }
+        if(directorio_exist) {
+            long timestamp = System.currentTimeMillis() / 1000;
+            String nameimg = "" + nombre + ".jpg";
+
+            mpath = Environment.getExternalStorageDirectory() + File.separator + MEDIA_DIRECTORIO + File.separator;
+            File file1 = new File(mpath,nameimg);
+            FileOutputStream fOut = null;
+
+            try {
+                fOut = new FileOutputStream(file1);
+
+                imagen.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+                fOut.flush();
+                fOut.close();
+                MakeSureFileWasCreatedThenMakeAvabile(file);
+                Toast.makeText(context, "Imagen guardada en la galería.", Toast.LENGTH_SHORT).show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+            return file.getAbsolutePath();
+    }
+    private void MakeSureFileWasCreatedThenMakeAvabile(File file){
+        MediaScannerConnection.scanFile(context,
+                new String[] { file.toString() } , null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+
+                    public void onScanCompleted(String path, Uri uri) {
+                    }
+                });
+    }
+
+
+    private void UnableToSave() {
+        Toast.makeText(context, "¡No se ha podido guardar la imagen!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void AbleToSave() {
+        Toast.makeText(context, "Imagen guardada en la galería.", Toast.LENGTH_SHORT).show();
+    }
+    private void opciones(final Context context, final String id_publicacion,String fecha) {
+        final CharSequence[] option={"Guardar","Cancelar"};
+        final AlertDialog.Builder builder=new AlertDialog.Builder(context);
+        builder.setTitle("Elige una opcion");
+        builder.setItems(option, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0:
+
+                        break;
+
+                    default:
+                        dialog.dismiss();
+                        break;
+
+                }
+            }
+
+
+        });
+        builder.show();
     }
 
     public void wap(List<foto> list){

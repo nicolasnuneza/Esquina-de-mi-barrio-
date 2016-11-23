@@ -1,6 +1,7 @@
 package com.tec.utb.esquinasdemiciudad.publicar;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -150,15 +151,71 @@ String res="";
     DatabaseReference root = FirebaseDatabase.getInstance().getReference();
 
     private DatabaseReference root1 = FirebaseDatabase.getInstance().getReference().child("usuarios");
-
+    Context context;
     //metodo para verificar si ya el dispositivo android esta registrado en el servidor
     private void verificar() {
+        context=this;
         final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         root1.child(uuid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    if(myBitmap_img!=null){
+                        final ProgressDialog progressDialog = new ProgressDialog(context);
+                        progressDialog.setMessage("Publicando...");
+                        progressDialog.show();
+
+                        des = textInputEditText.getText().toString();
+
+                        //
+                        final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+
+                        final String fecha = getDateTime();
+                        MySingleton.getInstance(getApplicationContext()).getRequestQueue();
+                        String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+                        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
+                                        subirfoto foto = new subirfoto(root.push().getKey(), "" + fecha, des, uuid, fecha + ".jpg");
+
+                                        root.child("fotos").child(foto.getFecha()+"-"+foto.getId()).setValue(foto);
+
+                                        progressDialog.dismiss();
+                                        Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
+                                        finish();
+
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.i("error","hay un error");
+                                progressDialog.dismiss();
+                                Toast.makeText(subir_foto.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+
+                            }
+                        }){
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String,String> params = new HashMap<String, String>();
+                                params.put("tipo","1");
+                                params.put("nombre_imagen",fecha);
+                                params.put("imagen",myBase64Image);
+                                return params;
+                            }
+                        };
+// Add the request to the RequestQueue.
+                        MySingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+                        //
+                        //
+                        //
+
+                    }
+                    else {Toast.makeText(subir_foto.this, "Debes cargar alguna imagen para publicarla", Toast.LENGTH_SHORT).show();}
+
 
                 } else {
                     Intent intent = new Intent(subir_foto.this, login.class);
@@ -178,58 +235,7 @@ String res="";
     private void publicar_foto() throws ExecutionException, InterruptedException {
 
 
-            if(myBitmap_img!=null){
-                final ProgressDialog progressDialog = new ProgressDialog(this);
-                progressDialog.setMessage("Publicando...");
-                progressDialog.show();
-
-                des = textInputEditText.getText().toString();
-
-                //
-                final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
-
-                final String fecha = getDateTime();
-                MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
-                                subirfoto foto = new subirfoto(root.push().getKey(), "" + fecha, des, uuid, fecha + ".jpg");
-
-                                root.child("fotos").child(foto.getFecha()+"-"+foto.getId()).setValue(foto);
-
-                                progressDialog.dismiss();
-                                Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
-                                finish();
-
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.i("error","hay un error");
-                    }
-                }){
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String,String> params = new HashMap<String, String>();
-                        params.put("tipo","1");
-                        params.put("nombre_imagen",fecha);
-                        params.put("imagen",myBase64Image);
-                        return params;
-                    }
-                };
-// Add the request to the RequestQueue.
-                MySingleton.getInstance(this).addToRequestQueue(stringRequest);
-                //
-                //
-                //
-
-            }
-            else {Toast.makeText(subir_foto.this, "Debes cargar alguna imagen para publicarla", Toast.LENGTH_SHORT).show();}
-
+verificar();
 
 
 
