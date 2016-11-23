@@ -262,6 +262,7 @@ try {
             final DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
             final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
+
             MySingleton.getInstance(this.getApplicationContext()).
                     getRequestQueue();
             String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
@@ -271,8 +272,7 @@ try {
                         public void onResponse(String response) {
                             // Display the first 500 characters of the response string.
                             Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
-
-                            root.child(usuarios.getId()).setValue(usuarios); progressDialog.dismiss();
+                            root.child(usuarios.getId()).setValue(usuarios);
                             progressDialog.dismiss();
                             Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
                             finish();
@@ -283,6 +283,7 @@ try {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.i("error","hay un error");
+                    Toast.makeText(ajustes.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
                 }
             }){
                 @Override
@@ -296,6 +297,7 @@ try {
             };
 // Add the request to the RequestQueue.
             MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
 
 
         }

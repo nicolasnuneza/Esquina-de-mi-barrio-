@@ -37,6 +37,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
+import com.tec.utb.esquinasdemiciudad.ajustes;
 import com.tec.utb.esquinasdemiciudad.login.login;
 import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
 
@@ -210,6 +211,8 @@ String res="";
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.i("error","hay un error");
+                        Toast.makeText(subir_foto.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+
                     }
                 }){
                     @Override

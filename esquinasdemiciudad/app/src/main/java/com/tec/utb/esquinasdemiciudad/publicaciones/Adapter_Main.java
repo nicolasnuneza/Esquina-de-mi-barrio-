@@ -60,7 +60,6 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         public CircleImageView imagen_avatar;
         public TextView fecha;
         public Button comentar;
-        public Button opciones;
         public TextView num_comentarios;
         public Button like_boton;
 
@@ -73,7 +72,6 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
             imagen_avatar= (CircleImageView) v.findViewById(R.id.imagen_avatar);
             fecha= (TextView) v.findViewById(R.id.fecha_publicacion);
             comentar= (Button) v.findViewById(R.id.boton_comentar);
-            opciones= (Button) v.findViewById(R.id.boton_opciones);
             like_boton= (Button) v.findViewById(R.id.boton_like);
         }
 
@@ -98,24 +96,33 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         root.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 boolean estado=false;
-                for(DataSnapshot n:dataSnapshot.getChildren()){
-                    like like1=n.getValue(like.class);
-                    if(like1.getId_publicacion().equals(id_publicacion)&&like1.getId_usuario().equals(id_usuario)){
-                        estado=true;
+                if(dataSnapshot.exists()){
+                    for(DataSnapshot n:dataSnapshot.getChildren()){
+                        like like1=n.getValue(like.class);
+                        if(like1.getId_publicacion().equals(id_publicacion)&&like1.getId_usuario().equals(id_usuario)){
+                            estado=true;
+
+                        }
 
                     }
-
-                }
-                if(estado==true){
-                    Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_black_24dp );
-                    img.setBounds( 0, 0, 60, 60 );
-                    button.setCompoundDrawables( img, null, null, null );
+                    if(estado==true){
+                        Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_black_24dp );
+                        img.setBounds( 0, 0, 50, 50 );
+                        button.setCompoundDrawables( img, null, null, null );
+                    }else {
+                        Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_black_24dp );
+                        img.setBounds( 0, 0, 50, 50 );
+                        button.setCompoundDrawables( img, null, null, null );
+                    }
                 }else {
                     Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_black_24dp );
-                    img.setBounds( 0, 0, 60, 60 );
+                    img.setBounds( 0, 0, 50, 50 );
                     button.setCompoundDrawables( img, null, null, null );
                 }
+
+
             }
 
             @Override
@@ -133,10 +140,7 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
     @Override
     public void onBindViewHolder(final Adapter_Main.ViewHolder holder, final int i) {
         final String uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        if(uuid.equals(items.get(i).avatar_nombre)){
-            holder.opciones.setVisibility(View.VISIBLE);
-        }else {holder.opciones.setVisibility(View.INVISIBLE);}
-        holder.nombre.setText("");
+      holder.nombre.setText("");
         holder.imagen.setImageBitmap(null);
         holder.imagen_avatar.setImageBitmap(null);
 
@@ -266,7 +270,8 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         request.setShouldCache(false);
 
         MySingleton.getInstance(context).addToRequestQueue(request);
-
+        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        holder.imagen.setMinimumWidth(screenWidth);
 
 
         holder.fecha.setText(items.get(i).getFecha());
@@ -290,6 +295,10 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
         mImageLoader = MySingleton.getInstance(context).getImageLoader();
 
         NetworkImageView smartImageView= (NetworkImageView) layout.findViewById(R.id.imagen_info);
+        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        int screenHeight=context.getResources().getDisplayMetrics().heightPixels;
+        smartImageView.setMinimumHeight(screenHeight-105);
+        smartImageView.setMinimumWidth(screenWidth);
         smartImageView.setImageUrl(bitmap,mImageLoader);
         TextView textView = (TextView) layout.findViewById(R.id.descripcion_info);
         textView.setText(des);

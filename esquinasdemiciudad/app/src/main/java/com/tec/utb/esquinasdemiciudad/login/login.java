@@ -29,11 +29,19 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.snowdream.android.widget.SmartImageView;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.http.http;
+import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -56,13 +64,19 @@ public class login extends AppCompatActivity {
 
     private final String APP_DIRECTORIO ="fotos/";
     private final String MEDIA_DIRECTORIO =APP_DIRECTORIO+"misfotos/";
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
+verificar();
         nombre= (TextInputEditText) findViewById(R.id.edittext_nombre);
         iniciar= (Button) findViewById(R.id.boton_iniciar);
         foto= (Button) findViewById(R.id.boton_foto);
@@ -94,6 +108,9 @@ public class login extends AppCompatActivity {
                 startActivityForResult(i.createChooser(i,"elige una opcion"), 300 );
             }
         });
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
@@ -141,6 +158,8 @@ public class login extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.i("error","hay un error");
+                        Toast.makeText(login.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+
                     }
                 }){
                     @Override
@@ -280,7 +299,35 @@ public class login extends AppCompatActivity {
         }
         return false;
     }
+    private DatabaseReference root1 = FirebaseDatabase.getInstance().getReference().child("usuarios");
 
+    //metodo para verificar si ya el dispositivo android esta registrado en el servidor
+    private void verificar() {
+        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        final ProgressDialog progressDialog=new ProgressDialog(this);
+        progressDialog.setMessage("Cargando...");
+        progressDialog.show();
+        root1.child(uuid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    progressDialog.dismiss();
+                    Intent intent = new Intent(login.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    progressDialog.dismiss();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+    }
 
 
     @Override
@@ -327,4 +374,39 @@ public class login extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
 }
