@@ -10,24 +10,21 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            >
+            android:weightSum="1">
             <com.android.volley.toolbox.NetworkImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="500dp"
                 android:id="@+id/imagen_info"
                 android:scaleType="fitCenter"
                 />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textColor="@android:color/background_light"
-                    android:id="@+id/descripcion_info"
-                    android:textSize="20dp"
-                    android:layout_weight="1"
-                    />
-
-
+            <TextView
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@android:color/background_light"
+                android:id="@+id/descripcion_info"
+                android:textSize="20dp"
+                android:layout_weight="1" />
         </LinearLayout>
 
     </ScrollView>

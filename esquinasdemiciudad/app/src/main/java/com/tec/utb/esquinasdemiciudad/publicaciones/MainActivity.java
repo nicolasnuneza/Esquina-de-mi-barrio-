@@ -44,7 +44,11 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
     final ArrayList<foto> items = new ArrayList();//array que contendra las publicaciones para despues mostrarlas en el recyclerveiw
-
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
             //metodo para verivicar si ya estamos registrado en la app
-
+            verificar();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -97,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
         //cargar las publicaciones
         mostrar();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     String nombre = "";
@@ -107,7 +114,38 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference root = FirebaseDatabase.getInstance().getReference();
 
     //metodo para obtener y cargar las publicaciones desde el servidor
+    public String fecha(String d) throws ParseException {
+        String[] mese={"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date1 = formatter.parse(d);
+        Date date = new Date();
+        dateFormat.format(date);
+        long dias = date.getTime() - date1.getTime();
 
+        long dias_ = dias / (1000 * 60 * 60 * 24);
+        Log.i("dias",""+dias_);
+        Log.i("segundos",""+dias/1000);
+        Log.i("minutos",""+(dias / (1000 * 60)));
+        Log.i("horas",""+(dias / (1000 * 60*60)));
+
+        if ((dias /(1000* 60)) < 1) {
+            return "hace unos segundos";
+        } else if ((dias / (1000*60)) < 60 && (dias / (1000*60)) >=1) {
+            return  (dias / (1000*60)) + "min";
+        } else if ((dias / (1000*60*60) ) >= 1 &&(dias / (1000*60*60) ) < 24 ) {
+            return (dias /(1000* 60 * 60)) + "h";
+        }
+        else if((dias / (1000*60*60*24)) >= 1&&(dias / (1000*60*60*24)) < 7){
+            return (dias /(1000* 60 * 60*24)) + "d";
+        }
+        else if((dias / (1000*60*60*24*7)) >= 1){
+            return (dias / (1000*60*60*24*7))+"sem";
+        }
+        else {return d;}
+
+
+    }
 
     private void mostrar() {
         root.child("fotos").addValueEventListener(new ValueEventListener() {
@@ -123,9 +161,11 @@ public class MainActivity extends AppCompatActivity {
                     String descripcion = postSnapshot.child("descripcion").getValue(String.class).toString();
                     Log.i("informacion", " " + imagen + urlimagen + id + nombre + avatar);
 
-
-                        items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+imagen, fecha, descripcion, "https://myservidor.000webhostapp.com/fotos_usuarios/"+id+".jpg",id,fecha, postSnapshot.child("id").getValue().toString()));
-
+                    try {
+                        items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+imagen, fecha(fecha), descripcion, "https://myservidor.000webhostapp.com/fotos_usuarios/"+id+".jpg",id,fecha, postSnapshot.child("id").getValue().toString()));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
 
                 }
                 Collections.sort(items, Collections.<foto>reverseOrder());
@@ -143,7 +183,30 @@ public class MainActivity extends AppCompatActivity {
     }
     //hace la mima funcion del metodo de arriba
 
+    private DatabaseReference root1 = FirebaseDatabase.getInstance().getReference().child("usuarios");
 
+    //metodo para verificar si ya el dispositivo android esta registrado en el servidor
+    private void verificar() {
+        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        root1.child(uuid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                } else {
+                    Intent intent = new Intent(MainActivity.this, login.class);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -169,7 +232,39 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
 }

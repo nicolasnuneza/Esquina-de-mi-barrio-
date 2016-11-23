@@ -102,8 +102,6 @@ public class Adapter_comentarios extends RecyclerView.Adapter<Adapter_comentario
     }
     @Override
     public void onBindViewHolder(final Adapter_comentarios.ViewHolder holder, int position) {
-        holder.imagen_avatar.setImageBitmap(null);
-        holder.nombre.setText("");
         DatabaseReference root = FirebaseDatabase.getInstance().getReference();
         root.child("usuarios").child(items.get(position).getId_persona()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

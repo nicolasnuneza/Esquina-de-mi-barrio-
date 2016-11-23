@@ -121,17 +121,16 @@ verificar();
 
     private void comentar(String id_publicacion,String mensaje) {
                 //
-        if(!mensaje.trim().equals("")) {
-            String fecha = getDateTime();
-            String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            String id = root.child("comentario").push().getKey();
-            comentario comentario1 = new comentario(id, mensaje, id_publicacion, uuid, fecha);
+                 String fecha = getDateTime();
+                                String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                                    String id=root.child("comentario").push().getKey();
+                                            comentario comentario1=new comentario(id,mensaje,id_publicacion,uuid,fecha);
 
 
-            root.child("comentarios").child(id).setValue(comentario1);
+                                root.child("comentarios").child(id).setValue(comentario1);
             editText.setText("");
 
-        }
+
 
 
 
