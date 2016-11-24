@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-   app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    >
+   <ProgressBar
+       android:id="@+id/progress_bar"
+       style="?android:progressBarStyle"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_gravity="center"
+       />
    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
        android:id="@+id/swipeRefresh"
        android:layout_width="match_parent"
@@ -16,8 +24,9 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:id="@+id/recyclerview_main"
-       android:background="#4d4e58">
+       android:background="#4d4e58"
+       android:visibility="gone">
 
    </android.support.v7.widget.RecyclerView>
    </android.support.v4.widget.SwipeRefreshLayout>
-</RelativeLayout>
+</FrameLayout>

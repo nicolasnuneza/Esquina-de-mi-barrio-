@@ -1,5 +1,6 @@
 package com.tec.utb.esquinasdemiciudad.publicaciones;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
+    ProgressBar progressBar;
+    int vista=10;
     final ArrayList<foto> items = new ArrayList();//array que contendra las publicaciones para despues mostrarlas en el recyclerveiw
 
     @Override
@@ -51,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-            //metodo para verivicar si ya estamos registrado en la app
+progressBar= (ProgressBar) findViewById(R.id.progress_bar);
+        //metodo para verivicar si ya estamos registrado en la app
             verificar();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -75,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
 
+                mRecyclerView.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+vista=10;
+
                 mostrar();
 
                 swipeRefreshLayout.setRefreshing(false);
@@ -88,7 +96,31 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
 
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int maxScroll = recyclerView.computeVerticalScrollRange();
+                int currentScroll = recyclerView.computeVerticalScrollOffset() + recyclerView.computeVerticalScrollExtent();
+                if (currentScroll==maxScroll) {
+
+                    vista=vista+10;
+
+                    Log.i("vista",vista+"");
+                    mostrar();
+                } else {
+
+
+                }
+            }
+        });
         // Crear un nuevo adaptador
         mAdapter = new Adapter_Main(items, getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
@@ -107,64 +139,27 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference root = FirebaseDatabase.getInstance().getReference();
 
     //metodo para obtener y cargar las publicaciones desde el servidor
-    public String fecha(String d) throws ParseException {
-        String[] mese={"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date1 = formatter.parse(d);
-        Date date = new Date();
-        dateFormat.format(date);
-        long dias = date.getTime() - date1.getTime();
 
-        long dias_ = dias / (1000 * 60 * 60 * 24);
-        Log.i("dias",""+dias_);
-        Log.i("segundos",""+dias/1000);
-        Log.i("minutos",""+(dias / (1000 * 60)));
-        Log.i("horas",""+(dias / (1000 * 60*60)));
-
-        if ((dias /(1000* 60)) < 1) {
-            return "hace unos segundos";
-        } else if ((dias / (1000*60)) < 60 && (dias / (1000*60)) >=1) {
-            return  (dias / (1000*60)) + "min";
-        } else if ((dias / (1000*60*60) ) >= 1 &&(dias / (1000*60*60) ) < 24 ) {
-            return (dias /(1000* 60 * 60)) + "h";
-        }
-        else if((dias / (1000*60*60*24)) >= 1&&(dias / (1000*60*60*24)) < 7){
-            return (dias /(1000* 60 * 60*24)) + "d";
-        }
-        else if((dias / (1000*60*60*24*7)) >= 1){
-            return (dias / (1000*60*60*24*7))+"sem";
-        }
-        else {return d;}
-
-
-    }
 
     private void mostrar() {
-        root.child("fotos").addValueEventListener(new ValueEventListener() {
+        root.child("fotos").limitToLast(vista).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 items.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    String imagen = postSnapshot.child("imagen").getValue(String.class).toString();
-                    id = postSnapshot.child("id_persona").getValue(String.class).toString();
+                    foto foto1=postSnapshot.getValue(foto.class);
 
-                    String fecha = postSnapshot.child("fecha").getValue(String.class).toString();
+                        items.add(foto1);
 
-                    String descripcion = postSnapshot.child("descripcion").getValue(String.class).toString();
-                    Log.i("informacion", " " + imagen + urlimagen + id + nombre + avatar);
-
-                    try {
-                        items.add(new foto("https://myservidor.000webhostapp.com/fotos_publicaciones/"+imagen, fecha(fecha), descripcion, "https://myservidor.000webhostapp.com/fotos_usuarios/"+id+".jpg",id,fecha, postSnapshot.child("id").getValue().toString()));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
 
                 }
+
                 Collections.sort(items, Collections.<foto>reverseOrder());
                 new Adapter_Main().wap(items);
                 mAdapter.notifyDataSetChanged();
 
+                mRecyclerView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
@@ -221,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, ajustes.class);
             startActivity(intent);
         }
+
 
         return super.onOptionsItemSelected(item);
     }

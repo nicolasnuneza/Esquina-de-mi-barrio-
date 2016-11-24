@@ -7,8 +7,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="#fff"
-        android:layout_marginStart="3dp"
-        android:layout_marginBottom="3dp"
+        android:layout_marginBottom="1dp"
         >
 
 
@@ -29,21 +28,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000"
-                android:textSize="20dp"
+                android:textSize="16dp"
                 android:id="@+id/nombre_avatar"
-                android:text="Luis cabarcas"
+
                 />
             <TextView
                 android:id="@+id/comentario_mensaje"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="hola a todos"/>
+                android:textSize="12dp"
+                />
         </LinearLayout>
        <TextView
            android:id="@+id/comentario_tiempo"
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
-           android:text="1h"
            android:layout_marginRight="2dp"
            android:textSize="15sp"
            />

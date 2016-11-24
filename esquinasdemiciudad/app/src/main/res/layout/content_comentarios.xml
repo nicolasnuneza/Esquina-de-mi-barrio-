@@ -12,11 +12,21 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.tec.utb.esquinasdemiciudad.comentarios.comentarios"
     tools:showIn="@layout/activity_comentarios">
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+
+        />
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:id="@+id/recyclerview_main">
+        android:id="@+id/recyclerview_main"
+        android:background="#fff"
+        android:visibility="gone">
 
     </android.support.v7.widget.RecyclerView>
     <LinearLayout

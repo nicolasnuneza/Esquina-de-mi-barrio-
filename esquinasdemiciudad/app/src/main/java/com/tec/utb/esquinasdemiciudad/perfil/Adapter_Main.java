@@ -1,4 +1,4 @@
-package com.tec.utb.esquinasdemiciudad.publicaciones;
+package com.tec.utb.esquinasdemiciudad.perfil;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -9,9 +9,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Environment;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -28,13 +25,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,14 +39,8 @@ import com.tec.utb.esquinasdemiciudad.comentarios.comentario;
 import com.tec.utb.esquinasdemiciudad.comentarios.comentarios;
 import com.tec.utb.esquinasdemiciudad.likes.like;
 import com.tec.utb.esquinasdemiciudad.login.Usuarios;
-import com.tec.utb.esquinasdemiciudad.perfil.perfil;
+import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,7 +55,7 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
  * Created by luis mi on 24/10/2016.
  */
 
-public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder> {
+public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> {
 
     private List<foto> items;//lista de las publicaciones
     public Context context;
@@ -104,8 +90,8 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
 
     }
 //Contructores
-   public  Adapter_Main(){}
-    public Adapter_Main(List<foto> items,Context context) {
+   public Adapter_Main(){}
+    public Adapter_Main(List<foto> items, Context context) {
         this.items = items;
         this.context=context;
 
@@ -192,10 +178,6 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
 
 
     }
-    public void verificar_like(final String id_publicacion, final String id_usuario){
-
-
-    }
     private int lastPosition = -1;
     private void setAnimation(View viewToAnimate, int position)
     {
@@ -261,9 +243,7 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 final Usuarios usuario=dataSnapshot.getValue(Usuarios.class);
-                SpannableString string = new SpannableString(usuario.getNombre());
-                string.setSpan(new UnderlineSpan(), 0, string.length(), 0);
-                holder.nombre.setText(string);
+                 holder.nombre.setText(usuario.getNombre());
                 holder.imagen_avatar.setImageBitmap(decodeBase64(usuario.getFoto()));
                 holder.imagen_avatar.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -281,14 +261,6 @@ public class Adapter_Main  extends RecyclerView.Adapter<Adapter_Main.ViewHolder>
             }
         });
 
-        holder.nombre.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(v.getContext(),perfil.class);
-                intent.putExtra("id_usuario",items.get(i).getId_persona());
-                v.getContext().startActivity(intent);
-            }
-        });
         root.child("comentarios").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

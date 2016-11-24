@@ -137,16 +137,8 @@ verificar();
             final DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
                 final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
-
-                MySingleton.getInstance(this.getApplicationContext()).
-                        getRequestQueue();
-                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
                                 // Display the first 500 characters of the response string.
-                                    Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
+                                    Usuarios usuarios = new Usuarios(name, myBase64Image, uuid);
                                     root.child(usuarios.getId()).setValue(usuarios);
                                     progressDialog.dismiss();
                                     Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
@@ -154,30 +146,8 @@ verificar();
                                 startActivity(intent);
                                     finish();
 
-
                             }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.i("error","hay un error");
-                        Toast.makeText(login.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
-
-                    }
-                }){
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String,String> params = new HashMap<String, String>();
-                        params.put("tipo","2");
-                        params.put("nombre_imagen",uuid);
-                        params.put("imagen",myBase64Image);
-                        return params;
-                    }
-                };
-// Add the request to the RequestQueue.
-                MySingleton.getInstance(this).addToRequestQueue(stringRequest);
-
-
-        }else {
+                       else {
                 Toast.makeText(this, "Carga alguna imagen y coloca un nombre", Toast.LENGTH_SHORT).show();
             }
 

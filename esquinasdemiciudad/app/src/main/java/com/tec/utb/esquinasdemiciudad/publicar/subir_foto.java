@@ -40,6 +40,7 @@ import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.ajustes;
 import com.tec.utb.esquinasdemiciudad.login.login;
 import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
+import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -58,7 +59,7 @@ public class subir_foto extends AppCompatActivity {
     //declaramos variables a utilizar
 
     private TextView text_mensaje;
-    private Button galeria,foto,publicar;
+    private Button galeria,foto_,publicar;
     private SmartImageView imagen;
     TextInputEditText textInputEditText;
     Bitmap myBitmap_img=null;
@@ -74,7 +75,7 @@ public class subir_foto extends AppCompatActivity {
 
         text_mensaje= (TextView) findViewById(R.id.text_mensaje);
         galeria= (Button) findViewById(R.id.button_galeria);
-        foto= (Button) findViewById(R.id.button_foto);
+        foto_= (Button) findViewById(R.id.button_foto);
         publicar= (Button) findViewById(R.id.button_publicar);
         imagen= (SmartImageView) findViewById(R.id.imagen);
         textInputEditText= (TextInputEditText) findViewById(R.id.descripcion_text);
@@ -91,7 +92,7 @@ public class subir_foto extends AppCompatActivity {
         });
         //evento para abrir la camara
 
-        foto.setOnClickListener(new View.OnClickListener() {
+        foto_.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
             opencamara();
@@ -180,26 +181,17 @@ String res="";
 
 
             if(myBitmap_img!=null){
-                final ProgressDialog progressDialog = new ProgressDialog(this);
+                 ProgressDialog progressDialog = new ProgressDialog(this);
                 progressDialog.setMessage("Publicando...");
                 progressDialog.show();
-
                 des = textInputEditText.getText().toString();
+                 String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
-                //
-                final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+                 String fecha = getDateTime();
 
-                final String fecha = getDateTime();
-                MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
                                 String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-                                subirfoto foto = new subirfoto(root.push().getKey(), "" + fecha, des, uuid, fecha + ".jpg");
-
+                                foto foto = new foto(root.push().getKey(),myBase64Image,fecha, uuid,des);
                                 root.child("fotos").child(foto.getFecha()+"-"+foto.getId()).setValue(foto);
 
                                 progressDialog.dismiss();
@@ -207,30 +199,7 @@ String res="";
                                 finish();
 
                             }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.i("error","hay un error");
-                        Toast.makeText(subir_foto.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
 
-                    }
-                }){
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String,String> params = new HashMap<String, String>();
-                        params.put("tipo","1");
-                        params.put("nombre_imagen",fecha);
-                        params.put("imagen",myBase64Image);
-                        return params;
-                    }
-                };
-// Add the request to the RequestQueue.
-                MySingleton.getInstance(this).addToRequestQueue(stringRequest);
-                //
-                //
-                //
-
-            }
             else {Toast.makeText(subir_foto.this, "Debes cargar alguna imagen para publicarla", Toast.LENGTH_SHORT).show();}
 
 

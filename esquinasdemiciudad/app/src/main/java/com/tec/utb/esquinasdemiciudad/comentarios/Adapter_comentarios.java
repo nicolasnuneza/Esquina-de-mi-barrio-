@@ -1,12 +1,17 @@
 package com.tec.utb.esquinasdemiciudad.comentarios;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.provider.Settings;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -22,6 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.login.Usuarios;
+import com.tec.utb.esquinasdemiciudad.perfil.perfil;
 import com.tec.utb.esquinasdemiciudad.publicaciones.Adapter_Main;
 import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
@@ -54,6 +60,7 @@ public class Adapter_comentarios extends RecyclerView.Adapter<Adapter_comentario
         public TextView mensaje;
         public CircleImageView imagen_avatar;
         public TextView fecha;
+        public View view;
 
         public ViewHolder(View v) {
             super(v);
@@ -62,7 +69,7 @@ public class Adapter_comentarios extends RecyclerView.Adapter<Adapter_comentario
             mensaje = (TextView) v.findViewById(R.id.comentario_mensaje);
             imagen_avatar= (CircleImageView) v.findViewById(R.id.imagen_avatar);
             fecha= (TextView) v.findViewById(R.id.comentario_tiempo);
-
+            this.view=v;
         }
 
     }
@@ -100,14 +107,57 @@ public class Adapter_comentarios extends RecyclerView.Adapter<Adapter_comentario
 
 
     }
+    public Bitmap decodeBase64(String input)
+    {
+        byte[] decodedBytes = Base64.decode(input.getBytes(), Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+    }
+    private int lastPosition = -1;
+    private void setAnimation(View viewToAnimate, int position)
+    {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition)
+        {
+            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
+        }
+    }
     @Override
-    public void onBindViewHolder(final Adapter_comentarios.ViewHolder holder, int position) {
+    public void onBindViewHolder(final Adapter_comentarios.ViewHolder holder, final int position) {
         DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+
+        holder.nombre.setText("");
+        holder.imagen_avatar.setImageBitmap(null);
+        holder.nombre.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(),perfil.class);
+                intent.putExtra("id_usuario",items.get(position).getId_persona());
+                v.getContext().startActivity(intent);
+            }
+        });
+        holder.imagen_avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(),perfil.class);
+                intent.putExtra("id_usuario",items.get(position).getId_persona());
+                v.getContext().startActivity(intent);
+            }
+        });
         root.child("usuarios").child(items.get(position).getId_persona()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Usuarios usuarios=dataSnapshot.getValue(Usuarios.class);
                 holder.nombre.setText(usuarios.getNombre());
+
+                holder.imagen_avatar.setImageBitmap(decodeBase64(usuarios.getFoto()));
+                holder.mensaje.setText(items.get(position).getMensaje());
+                try {
+                    holder.fecha.setText(fecha( items.get(position).getFecha()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -115,27 +165,9 @@ public class Adapter_comentarios extends RecyclerView.Adapter<Adapter_comentario
 
             }
         });
-        holder.mensaje.setText(items.get(position).getMensaje());
-        try {
-            holder.fecha.setText(fecha( items.get(position).getFecha()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        ImageRequest request = new ImageRequest("https://myservidor.000webhostapp.com/fotos_usuarios/"+items.get(position).getId_persona()+".jpg",
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap bitmap) {
-                        holder.imagen_avatar.setImageBitmap(bitmap);
-                    }
-                }, 0, 0, null,
-                new Response.ErrorListener() {
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
-// Access the RequestQueue through your singleton class.
-        request.setShouldCache(false);
 
-        MySingleton.getInstance(context).addToRequestQueue(request);
+
+setAnimation(holder.view,position);
 
     }
     public void wap(List<comentario> list){

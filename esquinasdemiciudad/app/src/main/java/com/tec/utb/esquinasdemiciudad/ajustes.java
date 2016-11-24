@@ -116,6 +116,11 @@ public class ajustes extends AppCompatActivity {
             }
         });
     }
+    public Bitmap decodeBase64(String input)
+    {
+        byte[] decodedBytes = Base64.decode(input.getBytes(), Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+    }
     //en este metodo cargamos los datos del usuario
     private void cargar_datos() throws ExecutionException, InterruptedException, JSONException, UnsupportedEncodingException {
 
@@ -124,19 +129,9 @@ public class ajustes extends AppCompatActivity {
         root.child(uuid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                editText.setText(dataSnapshot.child("nombre").getValue(String.class).toString());
-
-                Bitmap bitmap = null;
-                try {
-                    bitmap = http.Download_Image("https://myservidor.000webhostapp.com/fotos_usuarios/" + dataSnapshot.child("foto").getValue(String.class).toString());
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                profile.setImageBitmap(bitmap);
+                Usuarios usuario=dataSnapshot.getValue(Usuarios.class);
+                editText.setText(usuario.getNombre());
+                profile.setImageBitmap(decodeBase64(usuario.getFoto()));
             }
 
             @Override
@@ -144,91 +139,6 @@ public class ajustes extends AppCompatActivity {
 
             }
         });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*MySingleton.getInstance(this.getApplicationContext()).
-                getRequestQueue();
-        String url ="https://myservidor.000webhostapp.com/api/usuarios.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.i("JSON_login",response);
-
-                        if(response.length()>2) {
-try {
-    JSONObject jsonObject = new JSONObject(response);
-    JSONArray jsonArray = jsonObject.getJSONArray("usuario");
-
-    Bitmap bitmap = http.Download_Image("https://myservidor.000webhostapp.com/fotos_usuarios/" + jsonArray.getJSONObject(0).getString("foto"));
-    profile.setImageBitmap(bitmap);
-    editText.setText(jsonArray.getJSONObject(0).getString("nombre"));
-} catch (InterruptedException e) {
-    e.printStackTrace();
-} catch (ExecutionException e) {
-    e.printStackTrace();
-} catch (UnsupportedEncodingException e) {
-    e.printStackTrace();
-} catch (JSONException e) {
-    e.printStackTrace();
-}
-                        }
-
-                        else {
-                            Toast.makeText(ajustes.this, "a ocurrido un error al cargar los datos", Toast.LENGTH_SHORT).show();
-
-                        }
-
-
-
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("error","hay un error");
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("tipo_query","1");
-                params.put("id",uuid);
-                return params;
-            }
-        };
-        stringRequest.setShouldCache(false);
-// Add the request to the RequestQueue.
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
-
-
-       /* String []parms={"tipo_query","1","id",uuid};
-        String res1= http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",parms);
-        Log.i("string",res1);
-        if(res1.length()>2){
-            JSONObject jsonObject=new JSONObject(res1);
-            JSONArray jsonArray= jsonObject.getJSONArray("usuario");
-
-            Bitmap bitmap=http.Download_Image("https://myservidor.000webhostapp.com/fotos_usuarios/"+jsonArray.getJSONObject(0).getString("foto"));
-            profile.setImageBitmap(bitmap);
-            editText.setText(jsonArray.getJSONObject(0).getString("nombre"));
-
-        }else {
-            Toast.makeText(this, res1, Toast.LENGTH_SHORT).show();
-        }*/
 
 
 
@@ -263,44 +173,15 @@ try {
             final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
 
-            MySingleton.getInstance(this.getApplicationContext()).
-                    getRequestQueue();
-            String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // Display the first 500 characters of the response string.
-                            Usuarios usuarios = new Usuarios(name, uuid + ".jpg", uuid);
+                 Usuarios usuarios = new Usuarios(name, myBase64Image, uuid);
                             root.child(usuarios.getId()).setValue(usuarios);
                             progressDialog.dismiss();
                             Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
-                            finish();
+
 
 
                         }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.i("error","hay un error");
-                    Toast.makeText(ajustes.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
-                }
-            }){
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String,String> params = new HashMap<String, String>();
-                    params.put("tipo","2");
-                    params.put("nombre_imagen",uuid);
-                    params.put("imagen",myBase64Image);
-                    return params;
-                }
-            };
-// Add the request to the RequestQueue.
-            MySingleton.getInstance(this).addToRequestQueue(stringRequest);
 
-
-
-        }
         else {
             DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
             String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -310,58 +191,6 @@ try {
             Toast.makeText(this, "Nombre actualizado", Toast.LENGTH_SHORT).show();
         }
 
-
-/*
-        final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
-        String name=editText.getText().toString();
-        final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        String [] params={"tipo_query","3","id",uuid,"nombre",name,"foto",myBase64Image};
-        String res=http.Post("https://myservidor.000webhostapp.com/api/usuarios.php",params);
-        if(res.length()>2) {
-            Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        else {
-            Toast.makeText(ajustes.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-        }*/
-
-      /*  RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).
-                getRequestQueue();
-        String url ="http://comidasutb.gzpot.com/esquina/api/usuarios.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        Log.i("JSON",response);
-                        if(response.length()>2) {
-                            Toast.makeText(ajustes.this, "Actualizacion exitosa exitosa", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                        else {
-                            Toast.makeText(ajustes.this, "Ha ocurrido algun error", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("error","hay un error");
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("tipo_query","3");
-                params.put("id",uuid);
-                params.put("nombre",editText.getText().toString());
-                params.put("foto",myBase64Image);
-                return params;
-            }
-        };
-// Add the request to the RequestQueue.
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
-//
     }
 
 

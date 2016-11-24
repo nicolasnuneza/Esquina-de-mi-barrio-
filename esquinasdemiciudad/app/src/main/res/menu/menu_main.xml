@@ -3,10 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity">
 
-
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="200"
         android:title="Ajustes"
-        app:showAsAction="never" />
+        app:showAsAction="never"/>
 </menu>

@@ -25,7 +25,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".publicar.subir_foto" />
-        <activity   android:name=".publicaciones.MainActivity"
+        <activity
+            android:name=".publicaciones.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ajustes" />
@@ -40,7 +41,10 @@
         <activity
             android:name=".comentarios.comentarios"
             android:label="@string/title_activity_comentarios"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".perfil.perfil"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:label="perfil"></activity>
     </application>
 
 </manifest>
