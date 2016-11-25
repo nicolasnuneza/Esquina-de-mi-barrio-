@@ -21,6 +21,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -61,6 +63,8 @@ public class login extends AppCompatActivity {
     Bitmap myBitmap_img=null;
     String mpath="";
     String res="";
+    LinearLayout linearLayout;
+    ProgressBar progressBar;
 
     private final String APP_DIRECTORIO ="fotos/";
     private final String MEDIA_DIRECTORIO =APP_DIRECTORIO+"misfotos/";
@@ -76,12 +80,15 @@ public class login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-verificar();
         nombre= (TextInputEditText) findViewById(R.id.edittext_nombre);
         iniciar= (Button) findViewById(R.id.boton_iniciar);
         foto= (Button) findViewById(R.id.boton_foto);
         galeria= (Button) findViewById(R.id.boton_galeria);
         imagen= (SmartImageView) findViewById(R.id.imagen);
+        linearLayout= (LinearLayout) findViewById(R.id.login_layout);
+        progressBar= (ProgressBar) findViewById(R.id.progress_bar);
+        verificar();
+
         iniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -276,19 +283,17 @@ verificar();
     //metodo para verificar si ya el dispositivo android esta registrado en el servidor
     private void verificar() {
         final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-        final ProgressDialog progressDialog=new ProgressDialog(this);
-        progressDialog.setMessage("Cargando...");
-        progressDialog.show();
+
         root1.child(uuid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    progressDialog.dismiss();
                     Intent intent = new Intent(login.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 } else {
-                    progressDialog.dismiss();
+progressBar.setVisibility(View.GONE);
+                    linearLayout.setVisibility(View.VISIBLE);
                 }
             }
 

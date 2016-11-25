@@ -23,6 +23,7 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -71,7 +72,9 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
         public Button comentar;
         public TextView num_comentarios;
         public Button opciones;
-        public Button like_boton;
+        public ImageButton like_boton;
+        public TextView like_num;
+
         public View view;
 
         public ViewHolder(View v) {
@@ -83,7 +86,8 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
             imagen_avatar= (CircleImageView) v.findViewById(R.id.imagen_avatar);
             fecha= (TextView) v.findViewById(R.id.fecha_publicacion);
             comentar= (Button) v.findViewById(R.id.boton_comentar);
-            like_boton= (Button) v.findViewById(R.id.boton_like);
+            like_boton= (ImageButton) v.findViewById(R.id.boton_like);
+            like_num= (TextView) v.findViewById(R.id.textView_like);
             opciones= (Button) v.findViewById(R.id.boton_opciones);
             this.view=v;
         }
@@ -136,8 +140,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
 
     }
     final DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-
-    public void boton_color (final Button button, final String id_publicacion, final String id_usuario){
+    public void boton_color (final ImageButton button, final String id_publicacion, final String id_usuario){
         root.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -154,17 +157,15 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
                     }
                     if(estado==true){
                         Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_black_24dp );
-                        img.setBounds( 0, 0, 45, 45 );
-                        button.setCompoundDrawables( img, null, null, null );
+                        button.setImageDrawable(img);
                     }else {
                         Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_black_24dp );
-                        img.setBounds( 0, 0, 45, 45 );
-                        button.setCompoundDrawables( img, null, null, null );
+                        button.setImageDrawable(img);
                     }
                 }else {
                     Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_black_24dp );
-                    img.setBounds( 0, 0, 50, 50 );
-                    button.setCompoundDrawables( img, null, null, null );
+                    button.setImageDrawable(img);
+
                 }
 
 
@@ -284,16 +285,18 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
             int num=0;
-                if(dataSnapshot.exists()){
-                boton_color(holder.like_boton,items.get(i).getId(),uuid);
-                for(DataSnapshot n : dataSnapshot.getChildren()){
-                    like like=n.getValue(like.class);
-                    if(like.getId_publicacion().equals(items.get(i).getId())){
-                        num=num+1;
+                try {
+                    if (dataSnapshot.exists()) {
+                        boton_color(holder.like_boton, items.get(i).getId(), uuid);
+                        for (DataSnapshot n : dataSnapshot.getChildren()) {
+                            like like = n.getValue(like.class);
+                            if (like.getId_publicacion().equals(items.get(i).getId())) {
+                                num = num + 1;
+                            }
+                        }
+                        holder.like_num.setText(" " + num);
                     }
-                }
-                holder.like_boton.setText(" "+num);
-                }
+                }catch (Exception x){}
             }
 
             @Override

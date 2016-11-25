@@ -24,7 +24,7 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:id="@+id/recyclerview_main"
-       android:background="#4d4e58"
+       android:background="#ffffff"
        android:visibility="gone">
 
    </android.support.v7.widget.RecyclerView>

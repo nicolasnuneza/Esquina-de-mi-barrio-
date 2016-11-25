@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login.login"
-            android:label="Login">
+            android:label="My Gente">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +27,7 @@
         <activity android:name=".publicar.subir_foto" />
         <activity
             android:name=".publicaciones.MainActivity"
-            android:label="@string/app_name"
+            android:label="Mi Ciudad"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ajustes" />
         <!--

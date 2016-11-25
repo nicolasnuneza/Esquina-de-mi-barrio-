@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
     ProgressBar progressBar;
-    int vista=10;
+    int vista=20;
     final ArrayList<foto> items = new ArrayList();//array que contendra las publicaciones para despues mostrarlas en el recyclerveiw
 
     @Override
@@ -81,7 +81,7 @@ progressBar= (ProgressBar) findViewById(R.id.progress_bar);
 
                 mRecyclerView.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
-vista=10;
+vista=20;
 
                 mostrar();
 
@@ -111,10 +111,7 @@ vista=10;
                 int currentScroll = recyclerView.computeVerticalScrollOffset() + recyclerView.computeVerticalScrollExtent();
                 if (currentScroll==maxScroll) {
 
-                    vista=vista+10;
 
-                    Log.i("vista",vista+"");
-                    mostrar();
                 } else {
 
 
@@ -142,18 +139,19 @@ vista=10;
 
 
     private void mostrar() {
-        root.child("fotos").limitToLast(vista).addValueEventListener(new ValueEventListener() {
+        root.child("fotos").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                int num=0;
                 items.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     foto foto1=postSnapshot.getValue(foto.class);
-
+num+=1;
                         items.add(foto1);
 
 
                 }
-
+Log.i("numero",""+num);
                 Collections.sort(items, Collections.<foto>reverseOrder());
                 new Adapter_Main().wap(items);
                 mAdapter.notifyDataSetChanged();
