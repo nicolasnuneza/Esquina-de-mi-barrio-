@@ -1,5 +1,7 @@
 package com.tec.utb.esquinasdemiciudad.login;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by luis mi on 19/11/2016.
  */
@@ -32,6 +34,16 @@ public class Usuarios {
     private String id;
     private String foto;
     private String nombre;
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
+    Bitmap  bitmap;
 
     public Usuarios(){}
     public Usuarios(String nombre, String foto, String id) {

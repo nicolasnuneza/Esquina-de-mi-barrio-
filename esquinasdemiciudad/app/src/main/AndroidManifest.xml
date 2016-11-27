@@ -17,19 +17,27 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login.login"
-            android:label="My Gente">
+            android:label="My Gente"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".publicar.subir_foto" />
+        <activity
+            android:name=".publicar.subir_foto"
+            android:screenOrientation="portrait"
+            android:label="Hacer publicacion"/>
         <activity
             android:name=".publicaciones.MainActivity"
             android:label="Mi Ciudad"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ajustes" />
+        <activity
+            android:name=".ajustes"
+            android:label="Actualizar datos"
+            android:screenOrientation="portrait" />
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -42,9 +50,14 @@
             android:name=".comentarios.comentarios"
             android:label="@string/title_activity_comentarios"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".perfil.perfil"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:label="perfil"></activity>
+        <activity
+            android:name=".perfil.perfil"
+            android:label="perfil"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".likes.megustas"
+            android:label="@string/title_activity_megustas"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

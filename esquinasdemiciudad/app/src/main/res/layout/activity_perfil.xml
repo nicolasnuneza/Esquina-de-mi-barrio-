@@ -7,6 +7,81 @@
     android:fitsSystemWindows="true"
     tools:context="com.tec.utb.esquinasdemiciudad.perfil.perfil"
     >
+    <FrameLayout
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/linearLayout"
+            android:visibility="gone"
+            >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/linearLayout2"
+                >
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:id="@+id/edittext_nombre"
+                        android:textSize="14sp"
+                        android:textColor="#000"
+                        android:textStyle="bold"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="1dp"
+                        android:textSize="11sp"
+                        android:layout_gravity="center"
+                        android:textStyle="bold"
+                        android:textColor="#000"
+                        android:id="@+id/edittext_num_publicaciones"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:textSize="10sp"
+                        android:text="publicaciones"/>
+                </LinearLayout>
+
+            </LinearLayout>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recyclerview_main"
+                android:background="#ffffff"
+                />
+        </LinearLayout>
+    </FrameLayout>
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -20,77 +95,36 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay"
             >
-            <TextView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Perfil"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textColor="#fff"
-                />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+                <ImageButton
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="5dp"
+                    android:layout_width="50dp"
+                    android:layout_height="70dp"
+                    android:id="@+id/boton_back"
+                    android:src="@drawable/ic_arrow_back_white_24dp"
+                    android:background="#00000000"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="70dp"
+                    android:text="Perfil"
+                    android:gravity="center"
+                    android:textSize="18sp"
+                    android:textColor="#fff"
+                    android:layout_marginTop="5dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/textView3" />
+            </RelativeLayout>
+
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="40dp"
-        >
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/linearLayout2"
-            >
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/profile_image"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-android:layout_marginLeft="5dp"
-                android:layout_marginTop="5dp"/>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_gravity="center">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:id="@+id/edittext_nombre"
-                    android:textSize="14sp"
-                    android:textColor="#000"
-                    android:textStyle="bold"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="1dp"
-                    android:textSize="11sp"
-                    android:layout_gravity="center"
-                    android:textStyle="bold"
-                    android:textColor="#000"
-                    android:id="@+id/edittext_num_publicaciones"
-                    />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:textSize="10sp"
-                    android:text="publicaciones"/>
-            </LinearLayout>
-
-        </LinearLayout>
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/recyclerview_main"
-            android:background="#ffffff"
-            />
-    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

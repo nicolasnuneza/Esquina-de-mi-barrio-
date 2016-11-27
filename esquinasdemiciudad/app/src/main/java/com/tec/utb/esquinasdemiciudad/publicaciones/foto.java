@@ -1,5 +1,8 @@
 package com.tec.utb.esquinasdemiciudad.publicaciones;
 
+import android.graphics.Bitmap;
+import android.widget.ImageView;
+
 /**
  * Created by luis mi on 24/10/2016.
  */
@@ -60,6 +63,16 @@ public class foto implements Comparable<foto>{
     String descripcion;
     String fecha;
     String imagen;
+
+    public ImageView getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(ImageView bitmap) {
+        this.bitmap = bitmap;
+    }
+
+    ImageView bitmap;
     @Override
     public int compareTo(foto o) {
         return getFecha().compareTo(o.getFecha());

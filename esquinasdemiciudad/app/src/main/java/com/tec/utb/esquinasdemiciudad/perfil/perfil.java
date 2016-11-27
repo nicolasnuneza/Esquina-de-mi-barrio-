@@ -1,35 +1,34 @@
 package com.tec.utb.esquinasdemiciudad.perfil;
 
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.provider.Settings;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
-import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.login.Usuarios;
-import com.tec.utb.esquinasdemiciudad.perfil.Adapter_Main;
 import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
-import org.json.JSONException;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -38,6 +37,9 @@ public class perfil extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private TextView num;
+    private ProgressBar progressBar;
+    private ImageButton imageButton;
+    private LinearLayout linearLayout;
     TextView nombre;
     CircleImageView circleImageView;
     String id_usuario;
@@ -53,36 +55,23 @@ public class perfil extends AppCompatActivity {
         circleImageView= (CircleImageView) findViewById(R.id.profile_image);
         nombre= (TextView) findViewById(R.id.edittext_nombre);
         num=(TextView) findViewById(R.id.edittext_num_publicaciones);
+        progressBar= (ProgressBar) findViewById(R.id.progress_bar);
+        linearLayout= (LinearLayout) findViewById(R.id.linearLayout);
         id_usuario=getIntent().getStringExtra("id_usuario");
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_main);
-
+imageButton= (ImageButton) findViewById(R.id.boton_back);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         mRecyclerView.setHasFixedSize(true);
 
         // Usar un administrador para LinearLayout
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                int maxScroll = recyclerView.computeVerticalScrollRange();
-                int currentScroll = recyclerView.computeVerticalScrollOffset() + recyclerView.computeVerticalScrollExtent();
-                if (currentScroll==maxScroll) {
-
-                } else {
-
-
-                }
-            }
-        });
         // Crear un nuevo adaptador
         mAdapter = new Adapter_Main(items, getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
@@ -92,10 +81,7 @@ public class perfil extends AppCompatActivity {
 
     }
     private void mostrar() {
-        final ProgressDialog progressDialog=new ProgressDialog(this);
-        progressDialog.setMessage("Cargando...");
-        progressDialog.show();
-        root.child("fotos").addValueEventListener(new ValueEventListener() {
+         root.child("pubicaciones").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int nume=0;
@@ -109,10 +95,11 @@ if(foto1.getId_persona().equals(id_usuario)){
 }
                 }
                 num.setText(""+nume);
-                progressDialog.dismiss();
                 Collections.sort(items, Collections.<foto>reverseOrder());
                 new Adapter_Main().wap(items);
                 mAdapter.notifyDataSetChanged();
+                linearLayout.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
 
             }
 
@@ -129,14 +116,19 @@ if(foto1.getId_persona().equals(id_usuario)){
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }
     //en este metodo cargamos los datos del usuario
+    Context context;
     private void cargar_datos(){
-
+context=this;
         root.child("usuarios").child(id_usuario).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Usuarios usuario=dataSnapshot.getValue(Usuarios.class);
+                ImageLoader imageLoader= MySingleton.getInstance(context).getImageLoader();
+
+                imageLoader.get(usuario.getFoto(), ImageLoader.getImageListener(circleImageView,
+                        R.drawable.ic_cached_black_24dp, R.drawable.ic_close_black_24dp));
+
                 nombre.setText(usuario.getNombre());
-                circleImageView.setImageBitmap(decodeBase64(usuario.getFoto()));
             }
 
             @Override

@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.Settings;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.database.DataSnapshot;
@@ -26,17 +29,20 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
+import com.tec.utb.esquinasdemiciudad.http.http;
 import com.tec.utb.esquinasdemiciudad.login.Usuarios;
 import com.tec.utb.esquinasdemiciudad.perfil.perfil;
 import com.tec.utb.esquinasdemiciudad.publicaciones.Adapter_Main;
 import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -149,9 +155,15 @@ public class Adapter_comentarios extends RecyclerView.Adapter<Adapter_comentario
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Usuarios usuarios=dataSnapshot.getValue(Usuarios.class);
-                holder.nombre.setText(usuarios.getNombre());
+                    ImageLoader imageLoader= MySingleton.getInstance(context).getImageLoader();
 
-                holder.imagen_avatar.setImageBitmap(decodeBase64(usuarios.getFoto()));
+                    imageLoader.get(usuarios.getFoto(), ImageLoader.getImageListener(holder.imagen_avatar,
+                            R.drawable.ic_cached_white_24dp, R.drawable.ic_close_black_24dp));
+
+
+                SpannableString string = new SpannableString(usuarios.getNombre());
+                string.setSpan(new UnderlineSpan(), 0, string.length(), 0);
+                holder.nombre.setText(string);
                 holder.mensaje.setText(items.get(position).getMensaje());
                 try {
                     holder.fecha.setText(fecha( items.get(position).getFecha()));

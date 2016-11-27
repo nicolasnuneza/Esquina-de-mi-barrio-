@@ -35,15 +35,23 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
+import com.tec.utb.esquinasdemiciudad.ajustes;
 import com.tec.utb.esquinasdemiciudad.http.http;
 import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
+import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
+import com.tec.utb.esquinasdemiciudad.publicar.subir_foto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -138,20 +146,79 @@ public class login extends AppCompatActivity {
             if(myBitmap_img!=null&&!nombre.getText().toString().trim().equals("")){
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setMessage("Creando usuario...");
-            progressDialog.show();
+                progressDialog.setCancelable(false);
+                progressDialog.show();
             final String name = nombre.getText().toString();
             final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
             final DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
                 final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
-                                // Display the first 500 characters of the response string.
-                                    Usuarios usuarios = new Usuarios(name, myBase64Image, uuid);
-                                    root.child(usuarios.getId()).setValue(usuarios);
-                                    progressDialog.dismiss();
-                                    Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                                Intent intent=new Intent(login.this,MainActivity.class);
-                                startActivity(intent);
-                                    finish();
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                StorageReference storageRef = storage.getReferenceFromUrl("gs://myapplication-f9195.appspot.com");
+                StorageReference mountainsRef = storageRef.child("fotos_usuarios/"+uuid+".jpg");
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                myBitmap_img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+                UploadTask uploadTask = mountainsRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        Usuarios usuarios = new Usuarios(name, downloadUrl.toString(), uuid);
+                        root.child(usuarios.getId()).setValue(usuarios);
+                        progressDialog.dismiss();
+                        Toast.makeText(login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                        Intent intent=new Intent(login.this,MainActivity.class);
+                        startActivity(intent);
+                        finish();Log.i("foto",downloadUrl.toString());
+                    }
+                });
+
+
+               /* String[] params={"tipo","2","nombre_imagen",uuid,"imagen",myBase64Image};
+                http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);*/
+
+               /* MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+
+
+
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("error","hay un error");
+                        Toast.makeText(login.this, "No se pudo subir esta imagen", Toast.LENGTH_SHORT).show();
+
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("tipo","2");
+                        params.put("nombre_imagen",uuid);
+                        params.put("imagen",myBase64Image);
+                        return params;
+                    }
+                };
+// Add the request to the RequestQueue.
+                MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+*/
+
+                // Display the first 500 characters of the response string.
+
 
                             }
                        else {
@@ -292,7 +359,7 @@ public class login extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-progressBar.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
                     linearLayout.setVisibility(View.VISIBLE);
                 }
             }

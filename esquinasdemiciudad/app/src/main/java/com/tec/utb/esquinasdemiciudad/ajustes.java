@@ -1,6 +1,7 @@
 package com.tec.utb.esquinasdemiciudad;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,15 +28,24 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.http.http;
 import com.tec.utb.esquinasdemiciudad.login.Usuarios;
 import com.tec.utb.esquinasdemiciudad.login.login;
+import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
+import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
+import com.tec.utb.esquinasdemiciudad.publicar.subir_foto;
 
 import org.json.JSONException;
 
@@ -122,16 +132,23 @@ public class ajustes extends AppCompatActivity {
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }
     //en este metodo cargamos los datos del usuario
+    Context context;
     private void cargar_datos() throws ExecutionException, InterruptedException, JSONException, UnsupportedEncodingException {
-
+context=this;
         DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
         final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         root.child(uuid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 Usuarios usuario=dataSnapshot.getValue(Usuarios.class);
                 editText.setText(usuario.getNombre());
-                profile.setImageBitmap(decodeBase64(usuario.getFoto()));
+                ImageLoader imageLoader= MySingleton.getInstance(context).getImageLoader();
+
+                imageLoader.get(usuario.getFoto(), ImageLoader.getImageListener(profile,
+                        R.drawable.ic_cached_white_24dp, R.drawable.ic_close_black_24dp));
+
+
             }
 
             @Override
@@ -165,20 +182,76 @@ public class ajustes extends AppCompatActivity {
 
         if(myBitmap_img!=null){
             final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Creando usuario...");
+            progressDialog.setMessage("Actualizando usuario...");
+            progressDialog.setCancelable(false);
             progressDialog.show();
             final String name = editText.getText().toString();
             final String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
             final DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("usuarios");
             final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReferenceFromUrl("gs://myapplication-f9195.appspot.com");
+            StorageReference mountainsRef = storageRef.child("fotos_usuarios/"+uuid+".jpg");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            myBitmap_img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            UploadTask uploadTask = mountainsRef.putBytes(data);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle unsuccessful uploads
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    Usuarios usuarios = new Usuarios(name, downloadUrl.toString(), uuid);
+                    root.child(usuarios.getId()).setValue(usuarios);
+                    progressDialog.dismiss();
+                    Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
+                    Log.i("foto",downloadUrl.toString());
+                    imagen.setImageBitmap(null);
+                }
+            });
 
 
-                 Usuarios usuarios = new Usuarios(name, myBase64Image, uuid);
-                            root.child(usuarios.getId()).setValue(usuarios);
-                            progressDialog.dismiss();
-                            Toast.makeText(ajustes.this, "Actualizacion exitosa", Toast.LENGTH_SHORT).show();
+
+          /*
+            String[] params={"tipo","2","nombre_imagen",uuid,"imagen",myBase64Image};
+            http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);*/
+
+           /* MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+            String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
 
 
+
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i("error","hay un error");
+                    Toast.makeText(ajustes.this, "No se pudo subir esta imagen", Toast.LENGTH_SHORT).show();
+
+                }
+            }){
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String,String> params = new HashMap<String, String>();
+                    params.put("tipo","2");
+                    params.put("nombre_imagen",uuid);
+                    params.put("imagen",myBase64Image);
+                    return params;
+                }
+            };
+// Add the request to the RequestQueue.
+            MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+*/
 
                         }
 

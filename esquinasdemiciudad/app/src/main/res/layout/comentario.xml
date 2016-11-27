@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:id="@+id/nombre_avatar"
 
                 />
@@ -36,7 +36,7 @@
                 android:id="@+id/comentario_mensaje"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12dp"
+                android:textSize="13dp"
                 />
         </LinearLayout>
        <TextView
@@ -44,7 +44,7 @@
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:layout_marginRight="2dp"
-           android:textSize="15sp"
+           android:textSize="12sp"
            />
 
     </LinearLayout>

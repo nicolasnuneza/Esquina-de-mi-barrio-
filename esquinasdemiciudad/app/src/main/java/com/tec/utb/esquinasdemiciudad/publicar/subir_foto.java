@@ -1,6 +1,7 @@
 package com.tec.utb.esquinasdemiciudad.publicar;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -30,21 +32,32 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.snowdream.android.widget.SmartImageView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
-import com.tec.utb.esquinasdemiciudad.ajustes;
+import com.tec.utb.esquinasdemiciudad.http.http;
 import com.tec.utb.esquinasdemiciudad.login.login;
-import com.tec.utb.esquinasdemiciudad.publicaciones.MainActivity;
 import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,7 +71,6 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class subir_foto extends AppCompatActivity {
     //declaramos variables a utilizar
 
-    private TextView text_mensaje;
     private Button galeria,foto_,publicar;
     private SmartImageView imagen;
     TextInputEditText textInputEditText;
@@ -73,7 +85,6 @@ public class subir_foto extends AppCompatActivity {
         setContentView(R.layout.activity_subir_foto);
         String uuid = Settings.Secure.getString(this.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        text_mensaje= (TextView) findViewById(R.id.text_mensaje);
         galeria= (Button) findViewById(R.id.button_galeria);
         foto_= (Button) findViewById(R.id.button_foto);
         publicar= (Button) findViewById(R.id.button_publicar);
@@ -87,7 +98,6 @@ public class subir_foto extends AppCompatActivity {
                 Intent i=new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 i.setType("image/*");
                 startActivityForResult(i.createChooser(i,"elige una opcion"), 300 );
-                text_mensaje.setEnabled(false);
             }
         });
         //evento para abrir la camara
@@ -96,7 +106,6 @@ public class subir_foto extends AppCompatActivity {
             @Override
             public void onClick(View v) {
             opencamara();
-                text_mensaje.setEnabled(false);
             }
         });
         //evento para publicar foto
@@ -181,22 +190,76 @@ String res="";
 
 
             if(myBitmap_img!=null){
-                 ProgressDialog progressDialog = new ProgressDialog(this);
+                final ProgressDialog progressDialog = new ProgressDialog(this);
                 progressDialog.setMessage("Publicando...");
+                progressDialog.setCancelable(false);
                 progressDialog.show();
+
                 des = textInputEditText.getText().toString();
-                 String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
+                 final String myBase64Image = encodeToBase64(myBitmap_img, Bitmap.CompressFormat.JPEG, 100);
 
-                 String fecha = getDateTime();
+                 final String fecha = getDateTime();
 
-                                String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                                final String uuid = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                StorageReference storageRef = storage.getReferenceFromUrl("gs://myapplication-f9195.appspot.com");
+                StorageReference mountainsRef = storageRef.child("fotos_publicaciones/"+fecha+".jpg");
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                myBitmap_img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
 
-                                foto foto = new foto(root.push().getKey(),myBase64Image,fecha, uuid,des);
-                                root.child("fotos").child(foto.getFecha()+"-"+foto.getId()).setValue(foto);
+                UploadTask uploadTask = mountainsRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        foto foto = new foto(root.push().getKey(),downloadUrl.toString(),fecha, uuid,des);
+                        root.child("pubicaciones").child(foto.getFecha()+"-"+foto.getId()).setValue(foto);
+                        progressDialog.dismiss();
+                        Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
+                        finish();
+                        Log.i("foto",downloadUrl.toString());
+                    }
+                });
+              /*  String[] params={"tipo","1","nombre_imagen",fecha,"imagen",myBase64Image};
+                http.Post("https://myservidor.000webhostapp.com/api/subir_fotos.php",params);*/
 
-                                progressDialog.dismiss();
-                                Toast.makeText(subir_foto.this, "Publicacion exitosa", Toast.LENGTH_SHORT).show();
-                                finish();
+               /* MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+                String url ="https://myservidor.000webhostapp.com/api/subir_fotos.php";
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+
+
+
+
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("error","hay un error");
+                        Toast.makeText(subir_foto.this, "No se pudo subir esta imagen", Toast.LENGTH_SHORT).show();
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("tipo","1");
+                        params.put("nombre_imagen",fecha);
+                        params.put("imagen",myBase64Image);
+                        return params;
+                    }
+                };
+// Add the request to the RequestQueue.
+                MySingleton.getInstance(this).addToRequestQueue(stringRequest);*/
+
 
                             }
 

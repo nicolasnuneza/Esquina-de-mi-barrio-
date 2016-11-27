@@ -7,36 +7,28 @@
     tools:context="com.tec.utb.esquinasdemiciudad.publicar.subir_foto"
     android:scrollbars="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_marginTop="5dp">
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Elegir foto del perfil"
+                    android:id="@+id/textView"
+                    android:layout_below="@+id/edittext_nombre"
+                    />
                 <com.github.snowdream.android.widget.SmartImageView
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="match_parent"
                     android:id="@+id/imagen"
+                    android:layout_weight="1"
                     android:focusable="false">
                 </com.github.snowdream.android.widget.SmartImageView>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Carga una imagen"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="126dp"
-                    android:id="@+id/text_mensaje" />
-            </RelativeLayout>
+
+
             <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,7 +38,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Agrege alguna descripcion"
-                    android:id="@+id/descripcion_text"/>
+                    android:id="@+id/descripcion_text"
+                    android:maxHeight="165dp"/>
 
             </android.support.design.widget.TextInputLayout>
             <LinearLayout
@@ -86,5 +79,4 @@
 
         </LinearLayout>
 
-    </ScrollView>
 </RelativeLayout>

@@ -1,7 +1,9 @@
 package com.tec.utb.esquinasdemiciudad.publicaciones;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -17,6 +19,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.appdatasearch.GetRecentContextCall;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -26,11 +35,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.tec.utb.esquinasdemiciudad.MySingleton;
 import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.ajustes;
+import com.tec.utb.esquinasdemiciudad.http.http;
 import com.tec.utb.esquinasdemiciudad.login.login;
 import com.tec.utb.esquinasdemiciudad.publicar.subir_foto;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,28 +108,7 @@ vista=20;
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
 
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                int maxScroll = recyclerView.computeVerticalScrollRange();
-                int currentScroll = recyclerView.computeVerticalScrollOffset() + recyclerView.computeVerticalScrollExtent();
-                if (currentScroll==maxScroll) {
-
-
-                } else {
-
-
-                }
-            }
-        });
         // Crear un nuevo adaptador
         mAdapter = new Adapter_Main(items, getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
@@ -137,16 +128,20 @@ vista=20;
 
     //metodo para obtener y cargar las publicaciones desde el servidor
 
-
+Context context;
     private void mostrar() {
-        root.child("fotos").addValueEventListener(new ValueEventListener() {
+        context=this;
+        root.child("pubicaciones").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int num=0;
                 items.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    foto foto1=postSnapshot.getValue(foto.class);
-num+=1;
+                    final foto foto1=postSnapshot.getValue(foto.class);
+// Petición
+
+
+                    num+=1;
                         items.add(foto1);
 
 

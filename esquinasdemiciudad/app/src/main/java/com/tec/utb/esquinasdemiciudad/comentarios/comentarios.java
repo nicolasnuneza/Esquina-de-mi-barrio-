@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -30,6 +31,8 @@ public class comentarios extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private ImageButton imageButton;
+    TextView getTextView;
 ProgressBar progressBar;
     final ArrayList<comentario> items = new ArrayList();//array que contendra los comentarios para despues mostrarlas en el recyclerveiw
     DatabaseReference root = FirebaseDatabase.getInstance().getReference();
@@ -52,6 +55,14 @@ verificar();
         });
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_main);
         progressBar= (ProgressBar) findViewById(R.id.progress_bar);
+        imageButton= (ImageButton) findViewById(R.id.boton_back);
+        getTextView= (TextView) findViewById(R.id.textView3);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         mRecyclerView.setHasFixedSize(true);
 
         // Usar un administrador para LinearLayout
@@ -70,18 +81,20 @@ verificar();
         root.child("comentarios").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                int num=0;
                 items.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     comentario comentario1=postSnapshot.getValue(comentario.class);
 
                     if(comentario1.getId_publicacion().equals(id)){
                         items.add(comentario1);
-                        Log.i("comen",comentario1.getMensaje());
+                        num=num+1;
                     }
 
 
 
                 }
+                getTextView.setText(num+" Comentarios");
                 new Adapter_comentarios().wap(items);
                 mAdapter.notifyDataSetChanged();
                 mRecyclerView.setVisibility(View.VISIBLE);

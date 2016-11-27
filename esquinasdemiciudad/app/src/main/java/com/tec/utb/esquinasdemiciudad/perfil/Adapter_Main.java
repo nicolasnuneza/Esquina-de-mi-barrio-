@@ -4,8 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -13,18 +11,21 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
+import android.text.method.ScrollingMovementMethod;
 import android.text.style.UnderlineSpan;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -38,15 +39,19 @@ import com.tec.utb.esquinasdemiciudad.R;
 import com.tec.utb.esquinasdemiciudad.Save;
 import com.tec.utb.esquinasdemiciudad.comentarios.comentario;
 import com.tec.utb.esquinasdemiciudad.comentarios.comentarios;
+import com.tec.utb.esquinasdemiciudad.http.http;
 import com.tec.utb.esquinasdemiciudad.likes.like;
+import com.tec.utb.esquinasdemiciudad.likes.megustas;
 import com.tec.utb.esquinasdemiciudad.login.Usuarios;
 import com.tec.utb.esquinasdemiciudad.publicaciones.foto;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -74,7 +79,6 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
         public Button opciones;
         public ImageButton like_boton;
         public TextView like_num;
-
         public View view;
 
         public ViewHolder(View v) {
@@ -140,6 +144,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
 
     }
     final DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+
     public void boton_color (final ImageButton button, final String id_publicacion, final String id_usuario){
         root.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -179,6 +184,49 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
 
 
     }
+    public void boton_color2 (final ImageButton button, final String id_publicacion, final String id_usuario){
+        root.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                boolean estado=false;
+                if(dataSnapshot.getValue()!=null){
+                    for(DataSnapshot n:dataSnapshot.getChildren()){
+                        like like1=n.getValue(like.class);
+                        if(like1.getId_publicacion().equals(id_publicacion)&&like1.getId_usuario().equals(id_usuario)){
+                            estado=true;
+
+                        }
+
+                    }
+                    if(estado==true){
+                        Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_white_24dp );
+                        button.setImageDrawable(img);
+                    }else {
+                        Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_white_24dp );
+                        button.setImageDrawable(img);
+                    }
+                }else {
+                    Drawable img = context.getResources().getDrawable( R.drawable.ic_favorite_border_white_24dp );
+                    button.setImageDrawable(img);
+
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+    public void verificar_like(final String id_publicacion, final String id_usuario){
+
+
+    }
     private int lastPosition = -1;
     private void setAnimation(View viewToAnimate, int position)
     {
@@ -197,21 +245,24 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
             holder.opciones.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    opciones(v.getContext(),items.get(i).getId(),items.get(i).getFecha(),decodeBase64(items.get(i).getImagen()));
+                   opciones(v.getContext(),items.get(i).getId(),items.get(i).getFecha(),items.get(i).getImagen());
                 }
             });
         }else {
             holder.opciones.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    opciones2(v.getContext(),decodeBase64(items.get(i).getImagen()));
+                    opciones2(v.getContext(),items.get(i).getImagen());
                 }
             });
         }
       holder.nombre.setText("");
         holder.imagen.setImageBitmap(null);
         holder.imagen_avatar.setImageBitmap(null);
-        holder.imagen.setImageBitmap(decodeBase64(items.get(i).getImagen()));
+        ImageLoader imageLoader= MySingleton.getInstance(context).getImageLoader();
+// Petición
+        imageLoader.get(items.get(i).getImagen(), ImageLoader.getImageListener(holder.imagen,
+                R.drawable.ic_cached_black_24dp, R.drawable.ic_close_white_256dp_1x));
 
         holder.descripcion.setText(String.valueOf(items.get(i).getDescripcion()));
 
@@ -224,14 +275,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        holder.imagen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                showImage(v.getContext(),items.get(i).getImagen(),items.get(i).getDescripcion());
-
-            }
-        });
         holder.comentar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -244,16 +288,21 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 final Usuarios usuario=dataSnapshot.getValue(Usuarios.class);
-                 holder.nombre.setText(usuario.getNombre());
-                holder.imagen_avatar.setImageBitmap(decodeBase64(usuario.getFoto()));
-                holder.imagen_avatar.setOnClickListener(new View.OnClickListener() {
+                ImageLoader imageLoader= MySingleton.getInstance(context).getImageLoader();
+
+                imageLoader.get(usuario.getFoto(), ImageLoader.getImageListener(holder.imagen_avatar,
+                        R.drawable.ic_cached_white_24dp, R.drawable.ic_close_black_24dp));
+                holder.imagen.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        showImage(v.getContext(),usuario.getFoto(),usuario.getNombre());
 
+                        showImage(v.getContext(),items.get(i).getImagen(),items.get(i).getDescripcion(),items.get(i).getId(),items.get(i).getFecha(),items.get(i).getId_persona(),usuario.getNombre());
 
                     }
                 });
+
+                holder.nombre.setText(usuario.getNombre());
+
             }
 
             @Override
@@ -261,6 +310,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
 
             }
         });
+
 
         root.child("comentarios").addValueEventListener(new ValueEventListener() {
             @Override
@@ -273,7 +323,10 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
                         num=num+1;
                     }
                 }
-                holder.comentar.setText(" "+num);
+                if (num<=0){
+                    holder.comentar.setText("");
+                }else {
+                holder.comentar.setText(" "+num);}
             }
 
             @Override
@@ -285,18 +338,22 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
             int num=0;
-                try {
-                    if (dataSnapshot.exists()) {
-                        boton_color(holder.like_boton, items.get(i).getId(), uuid);
-                        for (DataSnapshot n : dataSnapshot.getChildren()) {
-                            like like = n.getValue(like.class);
-                            if (like.getId_publicacion().equals(items.get(i).getId())) {
-                                num = num + 1;
-                            }
-                        }
+
+                if(dataSnapshot.exists()){
+                boton_color(holder.like_boton,items.get(i).getId(),uuid);
+                for(DataSnapshot n : dataSnapshot.getChildren()){
+                    like like=n.getValue(like.class);
+                    if(like.getId_publicacion().equals(items.get(i).getId())){
+                        num=num+1;
+                    }
+                }
+                    if (num<=0){
+                        holder.like_num.setText("");
+                    }
+                    else {
                         holder.like_num.setText(" " + num);
                     }
-                }catch (Exception x){}
+                }
             }
 
             @Override
@@ -346,7 +403,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
         setAnimation(holder.view,i);
 
     }
-    private void opciones(final Context context, final String id_publicacion, final String fecha, final Bitmap imagen) {
+    private void opciones(final Context context, final String id_publicacion, final String fecha, final String imagen) {
 
         final CharSequence[] option={"Eliminar","Guardar","Cancelar"};
         final AlertDialog.Builder builder=new AlertDialog.Builder(context);
@@ -360,7 +417,15 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
                         break;
                     case 1:
                         Save save=new Save();
-                        save.SaveImage(context,imagen);
+                        try {
+                            save.SaveImage(context,http.Download_Image(imagen));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
 
                         break;
                     default:
@@ -376,7 +441,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
     }
 
     private void eliminar_publicacion(final String id_publicacion, String fecha) {
-        root.child("fotos").child(fecha+"-"+id_publicacion).removeValue();
+        root.child("pubicaciones").child(fecha+"-"+id_publicacion).removeValue();
         root.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -411,7 +476,7 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
         });
     }
 
-    private void opciones2(final Context context, final Bitmap imagen) {
+    private void opciones2(final Context context, final String imagen) {
 
         final CharSequence[] option={"Guardar","Cancelar"};
         final AlertDialog.Builder builder=new AlertDialog.Builder(context);
@@ -423,7 +488,15 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
                     case 0:
                             //Toast.makeText(context,saveImage(context,imagen).getAbsolutePath(), Toast.LENGTH_SHORT).show();
                         Save save=new Save();
-                        save.SaveImage(context,imagen);
+                        try {
+                            save.SaveImage(context,http.Download_Image(imagen));
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                         break;
 
                     default:
@@ -439,26 +512,214 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
     }
 
 
-    public Bitmap decodeBase64(String input)
-    {
-        byte[] decodedBytes = Base64.decode(input.getBytes(), Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+
+
+    public AlphaAnimation Fadein(){
+        AlphaAnimation alphaAnimation=new AlphaAnimation(0.0f,1.0f);
+        alphaAnimation.setDuration(500);
+        alphaAnimation.setFillAfter(true);
+return alphaAnimation;
     }
-    public void showImage(Context context,String bitmap,String des) {
+    public AlphaAnimation Fadeout(){
+
+        AlphaAnimation alphaAnimation=new AlphaAnimation(1.0f,0.0f);
+        alphaAnimation.setDuration(500);
+        alphaAnimation.setFillAfter(true);
+        return alphaAnimation;
+    }
+    public void showImage(Context context, final String bitmap, String des, final String id, final String fecha,String id_persona,String nombre) {
+        Log.i("id_publicacion",id);
+        final String uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(LAYOUT_INFLATER_SERVICE);
         View layout = layoutInflater.inflate(R.layout.info_foto, null);
-        ImageLoader mImageLoader;
-        mImageLoader = MySingleton.getInstance(context).getImageLoader();
+       ImageView smartImageView= (ImageView) layout.findViewById(R.id.imagen_info);
+        final LinearLayout linearLayout= (LinearLayout) layout.findViewById(R.id.contenedor_texto);
+        final ImageButton megusta= (ImageButton) layout.findViewById(R.id.boton_like);
+        final ImageButton cerrar= (ImageButton) layout.findViewById(R.id.boton_cerrar);
+        final ImageButton opciones= (ImageButton) layout.findViewById(R.id.boton_opciones);
+        final TextView textView= (TextView) layout.findViewById(R.id.textview_nombre_usuario);
+        textView.setText(nombre);
+        RelativeLayout relativeLayout= (RelativeLayout) layout.findViewById(R.id.relative);
+        ImageButton comentarios= (ImageButton) layout.findViewById(R.id.boton_comentar);
+        final TextView num_megusta= (TextView) layout.findViewById(R.id.textview_megusta);
+        final TextView num_comen= (TextView) layout.findViewById(R.id.textView_comentarios);
+        opciones.startAnimation(Fadein());
+        linearLayout.startAnimation(Fadein());
+        cerrar.startAnimation(Fadein());
+        textView.setAnimation(Fadein());
+       if(uuid.equals(id_persona)){
+            opciones.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    opciones(v.getContext(),id,fecha,bitmap);
+                }
+            });
+        }else {
+            opciones.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    opciones2(v.getContext(),bitmap);
+                }
+            });
+        }
 
-        ImageView smartImageView= (ImageView) layout.findViewById(R.id.imagen_info);
+        num_megusta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(),megustas.class);
+                intent.putExtra("id",id);
+                v.getContext().startActivity(intent);
+            }
+        });
+        smartImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(linearLayout.getVisibility()==View.VISIBLE){
+                    linearLayout.startAnimation(Fadeout());
+                    cerrar.startAnimation(Fadeout());
+                    opciones.startAnimation(Fadeout());
+                    textView.startAnimation(Fadeout());
+                   linearLayout.setVisibility(View.INVISIBLE);
+                    cerrar.setVisibility(View.INVISIBLE);
+                    opciones.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+                }else {
+
+                    linearLayout.startAnimation(Fadein());
+                    cerrar.startAnimation(Fadein());
+                    opciones.startAnimation(Fadein());
+                    textView.startAnimation(Fadein());
+
+                    linearLayout.setVisibility(View.VISIBLE);
+                    cerrar.setVisibility(View.VISIBLE);
+                    opciones.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+
+                }
+            }
+        });
+        num_comen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(),comentarios.class);
+                intent.putExtra("id",id);
+                v.getContext().startActivity(intent);
+            }
+        });
+
+        comentarios.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(),comentarios.class);
+                intent.putExtra("id",id);
+                v.getContext().startActivity(intent);
+            }
+        });
+        megusta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                root.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        boolean estado=false;
+                        String id1="";
+                        for(DataSnapshot n:dataSnapshot.getChildren()){
+                            like like1=n.getValue(like.class);
+                            if(like1.getId_publicacion().equals(id)&&like1.getId_usuario().equals(uuid)){
+                                id1=like1.getId();
+                                estado=true;
+
+
+                            }
+
+
+                        }
+                        if (estado==true){ root.child("likes").child(id1).removeValue();}
+                        else {
+                            String key=root.child("like").push().getKey();
+                            like like2=new like(key,uuid,id);
+                            root.child("likes").child(key).setValue(like2);
+                        }
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+            }
+        });
         int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         int screenHeight=context.getResources().getDisplayMetrics().heightPixels;
-        smartImageView.setMinimumHeight(screenHeight-((screenHeight/12))+2);
+        smartImageView.getLayoutParams().height=screenHeight-((screenHeight/26));
+        //smartImageView.setMinimumHeight(screenHeight-(screenHeight/25)+2);
         smartImageView.setMinimumWidth(screenWidth);
-        smartImageView.setImageBitmap(decodeBase64(bitmap));
-        TextView textView = (TextView) layout.findViewById(R.id.descripcion_info);
-        textView.setText(des);
-        Dialog dialog=new Dialog(context);
+        relativeLayout.getLayoutParams().width=screenWidth;
+
+        ImageLoader imageLoader= MySingleton.getInstance(context).getImageLoader();
+
+        imageLoader.get(bitmap, ImageLoader.getImageListener(smartImageView,
+                R.drawable.ic_cached_black_24dp, R.drawable.ic_close_white_24dp));
+
+        TextView textView1 = (TextView) layout.findViewById(R.id.descripcion_info);
+        textView1.setText(des);
+        textView1.setMovementMethod(new ScrollingMovementMethod());
+
+        root.child("comentarios").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int num=0;
+
+                for(DataSnapshot n : dataSnapshot.getChildren()){
+                    comentario comentario1=n.getValue(comentario.class);
+                    if(comentario1.getId_publicacion().equals(id)){
+                        num=num+1;
+                    }
+                }
+                if (num<=0){
+                    num_comen.setText("0 Comentarios");
+                }else {
+                    num_comen.setText(num+" Comentarios");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        root.child("likes").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int num=0;
+
+                if(dataSnapshot.exists()){
+                    boton_color2(megusta,id,uuid);
+                    for(DataSnapshot n : dataSnapshot.getChildren()){
+                        like like=n.getValue(like.class);
+                        if(like.getId_publicacion().equals(id)){
+                            num=num+1;
+                        }
+                    }
+                    if (num<=0){
+                        num_megusta.setText("0 Me gusta");
+                    }
+                    else {
+                        num_megusta.setText(num+" Me gusta");
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+       final Dialog dialog=new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         dialog.onBackPressed();
@@ -471,6 +732,13 @@ public class Adapter_Main extends RecyclerView.Adapter<Adapter_Main.ViewHolder> 
         dialog.setContentView(layout);
 
         dialog.show();
+
+      cerrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
 
     }
 
