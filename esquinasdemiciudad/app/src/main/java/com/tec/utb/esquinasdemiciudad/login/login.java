@@ -21,6 +21,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -30,7 +31,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.github.snowdream.android.widget.SmartImageView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -67,7 +67,7 @@ public class login extends AppCompatActivity {
 
     TextInputEditText nombre;
     Button iniciar,foto,galeria;
-    private SmartImageView imagen;
+    private ImageView imagen;
     Bitmap myBitmap_img=null;
     String mpath="";
     String res="";
@@ -92,7 +92,7 @@ public class login extends AppCompatActivity {
         iniciar= (Button) findViewById(R.id.boton_iniciar);
         foto= (Button) findViewById(R.id.boton_foto);
         galeria= (Button) findViewById(R.id.boton_galeria);
-        imagen= (SmartImageView) findViewById(R.id.imagen);
+        imagen= (ImageView) findViewById(R.id.imagen);
         linearLayout= (LinearLayout) findViewById(R.id.login_layout);
         progressBar= (ProgressBar) findViewById(R.id.progress_bar);
         verificar();

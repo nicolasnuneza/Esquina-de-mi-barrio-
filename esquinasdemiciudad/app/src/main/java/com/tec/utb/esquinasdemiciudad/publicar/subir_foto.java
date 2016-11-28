@@ -23,6 +23,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +32,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.github.snowdream.android.widget.SmartImageView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -72,7 +72,7 @@ public class subir_foto extends AppCompatActivity {
     //declaramos variables a utilizar
 
     private Button galeria,foto_,publicar;
-    private SmartImageView imagen;
+    private ImageView imagen;
     TextInputEditText textInputEditText;
     Bitmap myBitmap_img=null;
     String mpath="";
@@ -88,7 +88,7 @@ public class subir_foto extends AppCompatActivity {
         galeria= (Button) findViewById(R.id.button_galeria);
         foto_= (Button) findViewById(R.id.button_foto);
         publicar= (Button) findViewById(R.id.button_publicar);
-        imagen= (SmartImageView) findViewById(R.id.imagen);
+        imagen= (ImageView) findViewById(R.id.imagen);
         textInputEditText= (TextInputEditText) findViewById(R.id.descripcion_text);
         //evento para abrir la galeria
 

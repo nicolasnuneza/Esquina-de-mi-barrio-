@@ -35,13 +35,13 @@
             android:layout_below="@+id/edittext_nombre"
             />
 
-        <com.github.snowdream.android.widget.SmartImageView
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:id="@+id/imagen"
-            android:focusable="false">
-        </com.github.snowdream.android.widget.SmartImageView>
+            android:focusable="false"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
